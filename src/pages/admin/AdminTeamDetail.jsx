@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import { adminAPI } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const AdminTeamDetail = () => {
     const { teamId } = useParams();
@@ -32,10 +33,31 @@ const AdminTeamDetail = () => {
 
     const fetchTeam = async () => {
         try {
+            console.log('Fetching team with ID:', teamId);
             const response = await adminAPI.getTeam(teamId);
+            console.log('Team data received:', response.data);
             setTeam(response.data.data);
         } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to load team' });
+            console.error('Failed to load team:', err);
+            console.error('Error response:', err.response);
+            console.error('Error status:', err.response?.status);
+            console.error('Error data:', err.response?.data);
+
+
+            const errorMessage = err.response?.data?.message || 'Failed to load team';
+            const statusCode = err.response?.status;
+
+            if (statusCode === 404) {
+                toast.error('Team not found. It may have been deleted.');
+            } else if (statusCode === 401) {
+                toast.error('Unauthorized. Please log in again.');
+            } else if (!err.response) {
+                toast.error('Cannot connect to server. Please check if the backend is running.');
+            } else {
+                toast.error(errorMessage);
+            }
+
+            setMessage({ type: 'error', text: errorMessage });
         } finally {
             setLoading(false);
         }

@@ -3,148 +3,308 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
-    const { toggleTheme, isDark } = useTheme();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const { user, logout } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const getNavLinks = () => {
+    switch (user?.role) {
+      case 'admin':
+        return [
+          { path: '/admin', label: 'Teams' },
+          { path: '/admin/leaderboard', label: 'Leaderboard' }
+        ];
+      case 'evaluator':
+        return [
+          { path: '/evaluator', label: 'Teams' },
+          { path: '/evaluator/flash-round', label: 'Flash Round' }
+        ];
+      case 'team_lead':
+        return [
+          { path: '/team', label: 'Dashboard' }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getRoleBadge = () => {
+    const badges = {
+      admin: { label: 'ADMIN', color: '#ef4444' },
+      evaluator: { label: 'EVALUATOR', color: '#f59e0b' },
+      team_lead: { label: 'TEAM LEAD', color: '#10b981' }
     };
+    return badges[user?.role] || { label: 'USER', color: '#6b7280' };
+  };
 
-    const getNavLinks = () => {
-        switch (user?.role) {
-            case 'admin':
-                return [
-                    { path: '/admin', label: 'Teams' },
-                    { path: '/admin/leaderboard', label: 'Leaderboard' }
-                ];
-            case 'evaluator':
-                return [
-                    { path: '/evaluator', label: 'Teams' },
-                    { path: '/evaluator/flash-round', label: 'Flash Round' }
-                ];
-            case 'team_lead':
-                return [
-                    { path: '/team', label: 'Dashboard' }
-                ];
-            default:
-                return [];
+  const roleBadge = getRoleBadge();
+
+  return (
+    <nav className="navbar">
+      <div className="navbar-left">
+        <Link to="/" className="navbar-brand">
+          <span className="brand-icon">P</span>
+          <span className="brand-text">PRAJWALAN</span>
+          <span className="brand-year">2K26</span>
+        </Link>
+      </div>
+
+      <div className="navbar-center">
+        <div className="navbar-nav">
+          {getNavLinks().map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="navbar-right">
+        <div className="navbar-user">
+          <div className="user-info">
+            <span className="user-name">{user?.name}</span>
+            <span
+              className="role-badge"
+              style={{
+                background: `${roleBadge.color}15`,
+                border: `1px solid ${roleBadge.color}40`,
+                color: roleBadge.color
+              }}
+            >
+              {roleBadge.label}
+            </span>
+          </div>
+          <div className="navbar-actions">
+            <button
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+            >
+              <span className="theme-icon">{isDark ? 'Light' : 'Dark'}</span>
+            </button>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        /* Navbar Layout */
+        .navbar-left, .navbar-center, .navbar-right {
+          display: flex;
+          align-items: center;
         }
-    };
 
-    const getRoleBadge = () => {
-        const badges = {
-            admin: { label: 'ADMIN', color: '#ef4444' },
-            evaluator: { label: 'EVALUATOR', color: '#f59e0b' },
-            team_lead: { label: 'TEAM LEAD', color: '#10b981' }
-        };
-        return badges[user?.role] || { label: 'USER', color: '#6b7280' };
-    };
+        .navbar-left {
+          flex: 0 0 auto;
+        }
 
-    const roleBadge = getRoleBadge();
+        .navbar-center {
+          flex: 1;
+          justify-content: center;
+        }
 
-    return (
-        <nav className="navbar">
-            <Link to="/" className="navbar-brand">PRAJWALAN</Link>
+        .navbar-right {
+          flex: 0 0 auto;
+        }
 
-            <div className="navbar-nav">
-                {getNavLinks().map((link) => (
-                    <Link
-                        key={link.path}
-                        to={link.path}
-                        className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
-                    >
-                        {link.label}
-                    </Link>
-                ))}
-            </div>
+        /* Brand Styling */
+        .navbar-brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          text-decoration: none;
+          padding: 8px 16px;
+          border-radius: 8px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          background: rgba(139, 92, 246, 0.05);
+          border: 1px solid rgba(139, 92, 246, 0.15);
+        }
 
-            <div className="navbar-user">
-                <span
-                    className="role-badge"
-                    style={{
-                        background: `${roleBadge.color}22`,
-                        border: `1px solid ${roleBadge.color}`,
-                        color: roleBadge.color
-                    }}
-                >
-                    {roleBadge.label}
-                </span>
-                <span className="user-name">{user?.name}</span>
-                <button
-                    onClick={toggleTheme}
-                    className="theme-toggle-btn"
-                    title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-                >
-                    {isDark ? '☀️' : '🌙'}
-                </button>
-                <button onClick={handleLogout} className="btn btn-secondary btn-sm">
-                    Logout
-                </button>
-            </div>
+        .navbar-brand:hover {
+          background: rgba(139, 92, 246, 0.1);
+          border-color: rgba(139, 92, 246, 0.3);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+        }
 
-            <style>{`
+        .brand-icon {
+          font-size: 24px;
+          font-weight: 900;
+          font-family: 'Orbitron', sans-serif;
+          color: #8b5cf6;
+          background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .brand-text {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--text-primary);
+          letter-spacing: 1.5px;
+        }
+
+        .brand-year {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          color: #8b5cf6;
+          background: rgba(139, 92, 246, 0.15);
+          padding: 2px 8px;
+          border-radius: 4px;
+          letter-spacing: 0.5px;
+        }
+
+        /* User Section */
         .navbar-user {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 16px;
         }
 
-        .role-badge {
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 1px;
+        .user-info {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
         }
 
         .user-name {
-          color: var(--text-secondary);
-          font-weight: 500;
-        }
-
-        .btn-sm {
-          padding: 8px 16px;
-          font-size: 12px;
-        }
-
-        .theme-toggle-btn {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
           color: var(--text-primary);
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
+          font-weight: 600;
+          font-size: 14px;
+          letter-spacing: 0.3px;
+        }
+
+        .role-badge {
+          padding: 3px 10px;
+          border-radius: 12px;
+          font-family: 'Inter', sans-serif;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          backdrop-filter: blur(10px);
+        }
+
+        .navbar-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+          background: rgba(139, 92, 246, 0.1);
+          border: 1.5px solid rgba(139, 92, 246, 0.25);
+          color: var(--text-primary);
+          padding: 8px 14px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
           cursor: pointer;
-          transition: all 0.3s ease;
-          backdrop-filter: blur(5px);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          backdrop-filter: blur(10px);
+        }
+
+        .theme-icon {
+          font-size: 12px;
+          font-weight: 600;
+          font-family: 'Inter', sans-serif;
+          letter-spacing: 0.5px;
+          color: rgba(167, 139, 250, 0.9);
         }
 
         .theme-toggle-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: scale(1.1);
-          box-shadow: 0 0 15px rgba(255,255,255,0.3);
+          background: rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
         }
 
+        .theme-toggle-btn:hover .theme-icon {
+          color: #a78bfa;
+        }
+
+        .theme-toggle-btn:active {
+          transform: translateY(0);
+        }
+
+        /* Logout Button */
+        .logout-btn {
+          padding: 10px 20px;
+          background: rgba(139, 92, 246, 0.08);
+          border: 1.5px solid rgba(139, 92, 246, 0.25);
+          border-radius: 8px;
+          color: rgba(167, 139, 250, 0.9);
+          font-size: 13px;
+          font-weight: 600;
+          font-family: 'Inter', sans-serif;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          letter-spacing: 0.3px;
+        }
+
+        .logout-btn:hover {
+          background: rgba(139, 92, 246, 0.15);
+          border-color: rgba(139, 92, 246, 0.4);
+          color: #a78bfa;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .logout-btn:active {
+          transform: translateY(0);
+          background: rgba(139, 92, 246, 0.2);
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-          .navbar-user {
-            width: 100%;
-            justify-content: center;
-          }
-          .user-name {
+          .navbar-center {
             display: none;
+          }
+
+          .user-info {
+            display: none;
+          }
+
+          .navbar-user {
+            gap: 8px;
+          }
+
+          .brand-text {
+            font-size: 16px;
+          }
+
+          .brand-year {
+            font-size: 10px;
+            padding: 2px 6px;
+          }
+
+          .logout-btn {
+            padding: 8px 14px;
+            font-size: 12px;
           }
         }
       `}</style>
-        </nav>
-    );
+    </nav>
+  );
 };
 
 export default Navbar;

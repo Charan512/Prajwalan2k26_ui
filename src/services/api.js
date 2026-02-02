@@ -70,4 +70,10 @@ export const teamLeadAPI = {
     getTasks: () => api.get('/teamlead/tasks')
 };
 
+// Timer API
+export const timerAPI = {
+    getActiveTimer: () => api.get('/timer/active'),
+    getTimerHistory: () => api.get('/timer/history')
+};
+
 export default api;

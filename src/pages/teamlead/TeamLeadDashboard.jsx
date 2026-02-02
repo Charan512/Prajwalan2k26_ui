@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
+import CountdownTimer from '../../components/CountdownTimer';
 import { teamLeadAPI } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
-import { GridScan } from '../../components/GridScan';
 
 const TeamLeadDashboard = () => {
   const [dashboard, setDashboard] = useState(null);
@@ -87,17 +87,13 @@ const TeamLeadDashboard = () => {
   return (
     <div className="dashboard-wrapper">
       <div className="vr-background">
-        <GridScan
-          sensitivity={0.5}
-          lineThickness={1.5}
-          linesColor={isDark ? "#4f46e5" : "#cbd5e1"}
-          gridScale={0.15}
-          scanColor={isDark ? "#ec4899" : "#3b82f6"}
-          scanOpacity={0.3}
-          enablePost
-          bloomIntensity={0.4}
-          noiseIntensity={0.005}
-        />
+        {/* Animated gradient mesh background */}
+        <div className="gradient-mesh">
+          <div className="gradient-orb orb-1"></div>
+          <div className="gradient-orb orb-2"></div>
+          <div className="gradient-orb orb-3"></div>
+          <div className="gradient-orb orb-4"></div>
+        </div>
         {/* Soft overlay gradient for better text readability */}
         <div className="vr-overlay"></div>
       </div>
@@ -114,7 +110,7 @@ const TeamLeadDashboard = () => {
                   <span className="domain-badge">{dashboard.domain}</span>
                 )}
                 {dashboard?.isFlashRoundSelected && (
-                  <span className="flash-badge">⚡ FLASH ROUND SELECTED</span>
+                  <span className="flash-badge">⚡</span>
                 )}
               </div>
             </div>
@@ -131,6 +127,9 @@ const TeamLeadDashboard = () => {
           {error && <div className="alert alert-error">{error}</div>}
 
           <div className="dashboard-content">
+            {/* Countdown Timer */}
+            <CountdownTimer />
+
             <div className="status-instruction-card glass-card fade-in">
               <div className="instruction-icon">ℹ️</div>
               <div className="instruction-content">
@@ -234,8 +233,86 @@ const TeamLeadDashboard = () => {
           width: 100%;
           height: 100%;
           background: ${isDark
-          ? 'radial-gradient(circle at center, rgba(15, 17, 21, 0.4) 0%, rgba(15, 17, 21, 0.85) 100%)'
-          : 'radial-gradient(circle at center, rgba(240, 242, 245, 0.4) 0%, rgba(240, 242, 245, 0.85) 100%)'};
+          ? 'radial-gradient(circle at center, rgba(15, 17, 21, 0.2) 0%, rgba(15, 17, 21, 0.6) 100%)'
+          : 'radial-gradient(circle at center, rgba(248, 249, 250, 0.2) 0%, rgba(248, 249, 250, 0.6) 100%)'};
+        }
+
+        /* Animated gradient mesh background */
+        .gradient-mesh {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        .gradient-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(100px);
+          opacity: ${isDark ? '0.6' : '0.5'};
+          animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+          width: 600px;
+          height: 600px;
+          background: ${isDark
+          ? 'radial-gradient(circle, rgba(139, 92, 246, 1) 0%, rgba(124, 58, 237, 0.6) 50%, transparent 100%)'
+          : 'radial-gradient(circle, rgba(124, 58, 237, 0.8) 0%, rgba(139, 92, 246, 0.4) 50%, transparent 100%)'};
+          top: -15%;
+          left: -15%;
+          animation-delay: 0s;
+        }
+
+        .orb-2 {
+          width: 500px;
+          height: 500px;
+          background: ${isDark
+          ? 'radial-gradient(circle, rgba(236, 72, 153, 0.9) 0%, rgba(219, 39, 119, 0.5) 50%, transparent 100%)'
+          : 'radial-gradient(circle, rgba(219, 39, 119, 0.7) 0%, rgba(236, 72, 153, 0.35) 50%, transparent 100%)'};
+          top: 15%;
+          right: -10%;
+          animation-delay: -5s;
+          animation-duration: 25s;
+        }
+
+        .orb-3 {
+          width: 550px;
+          height: 550px;
+          background: ${isDark
+          ? 'radial-gradient(circle, rgba(99, 102, 241, 0.95) 0%, rgba(79, 70, 229, 0.55) 50%, transparent 100%)'
+          : 'radial-gradient(circle, rgba(79, 70, 229, 0.75) 0%, rgba(99, 102, 241, 0.4) 50%, transparent 100%)'};
+          bottom: -15%;
+          left: 15%;
+          animation-delay: -10s;
+          animation-duration: 30s;
+        }
+
+        .orb-4 {
+          width: 450px;
+          height: 450px;
+          background: ${isDark
+          ? 'radial-gradient(circle, rgba(167, 139, 250, 0.85) 0%, rgba(139, 92, 246, 0.5) 50%, transparent 100%)'
+          : 'radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(167, 139, 250, 0.35) 50%, transparent 100%)'};
+          bottom: 5%;
+          right: 10%;
+          animation-delay: -15s;
+          animation-duration: 22s;
+        }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          25% {
+            transform: translate(60px, -60px) scale(1.15);
+          }
+          50% {
+            transform: translate(-40px, 40px) scale(0.85);
+          }
+          75% {
+            transform: translate(50px, 25px) scale(1.1);
+          }
         }
 
         .dashboard-content-container {
@@ -243,13 +320,24 @@ const TeamLeadDashboard = () => {
           z-index: 1;
         }
 
-        /* Override glass-card for better VR transparency */
+        /* Enhanced glass-card with better light mode support */
         .glass-card {
-          background: ${isDark ? 'rgba(24, 27, 33, 0.65)' : 'rgba(255, 255, 255, 0.65)'};
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'};
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+          background: ${isDark ? 'rgba(24, 27, 33, 0.7)' : 'rgba(255, 255, 255, 0.85)'};
+          backdrop-filter: blur(16px) saturate(180%);
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
+          border: 1px solid ${isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(124, 58, 237, 0.1)'};
+          box-shadow: ${isDark
+          ? '0 8px 32px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(139, 92, 246, 0.05) inset'
+          : '0 4px 16px 0 rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(124, 58, 237, 0.05) inset'};
+          border-radius: 16px;
+          transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+          border-color: ${isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(124, 58, 237, 0.2)'};
+          box-shadow: ${isDark
+          ? '0 12px 40px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.1) inset'
+          : '0 8px 24px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(124, 58, 237, 0.1) inset'};
         }
 
         .team-header {
@@ -258,6 +346,18 @@ const TeamLeadDashboard = () => {
           align-items: center;
           padding: 32px;
           margin-bottom: 32px;
+          animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .team-header-left {
@@ -268,164 +368,237 @@ const TeamLeadDashboard = () => {
 
         .team-number-large {
           font-family: 'Orbitron', sans-serif;
-          font-size: 64px;
+          font-size: 72px;
           font-weight: 900;
-          background: var(--gradient-text);
+          background: ${isDark
+          ? 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%)'
+          : 'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #6366f1 100%)'};
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+          background-clip: text;
+          text-shadow: ${isDark ? '0 0 30px rgba(139, 92, 246, 0.3)' : 'none'};
+          letter-spacing: -2px;
         }
 
         .team-name-large {
-          font-size: 32px;
-          margin-bottom: 8px;
-          font-weight: 700;
+          font-size: 36px;
+          margin-bottom: 12px;
+          font-weight: 800;
           letter-spacing: -0.5px;
+          color: var(--text-primary);
+          font-family: 'Orbitron', sans-serif;
         }
 
         .domain-badge {
           display: inline-block;
-          padding: 4px 12px;
-          background: rgba(139, 92, 246, 0.15);
-          border: 1px solid rgba(139, 92, 246, 0.4);
-          border-radius: 20px;
-          color: #a78bfa;
-          font-size: 12px;
-          font-weight: 600;
+          padding: 6px 16px;
+          background: ${isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(124, 58, 237, 0.1)'};
+          border: 1.5px solid ${isDark ? 'rgba(139, 92, 246, 0.4)' : 'rgba(124, 58, 237, 0.3)'};
+          border-radius: 24px;
+          color: ${isDark ? '#a78bfa' : '#7c3aed'};
+          font-size: 13px;
+          font-weight: 700;
           margin-right: 8px;
           margin-bottom: 8px;
-          box-shadow: 0 0 10px rgba(139, 92, 246, 0.1);
+          box-shadow: ${isDark ? '0 0 12px rgba(139, 92, 246, 0.2)' : '0 2px 8px rgba(124, 58, 237, 0.15)'};
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .flash-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          background: ${isDark ? 'rgba(236, 72, 153, 0.15)' : 'rgba(236, 72, 153, 0.1)'};
+          border: 1.5px solid ${isDark ? 'rgba(236, 72, 153, 0.4)' : 'rgba(236, 72, 153, 0.3)'};
+          border-radius: 24px;
+          color: ${isDark ? '#f472b6' : '#db2777'};
+          font-size: 16px;
+          font-weight: 700;
+          box-shadow: ${isDark ? '0 0 12px rgba(236, 72, 153, 0.3)' : '0 2px 8px rgba(236, 72, 153, 0.2)'};
+          animation: flashPulse 2s infinite;
+        }
+
+        @keyframes flashPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
         }
 
         .team-members {
           text-align: right;
+          background: ${isDark ? 'rgba(139, 92, 246, 0.05)' : 'rgba(124, 58, 237, 0.03)'};
+          padding: 16px 20px;
+          border-radius: 12px;
+          border: 1px solid ${isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(124, 58, 237, 0.08)'};
         }
 
         .team-members h4 {
-          color: var(--text-secondary);
-          margin-bottom: 8px;
-          font-size: 14px;
+          color: ${isDark ? '#a78bfa' : '#7c3aed'};
+          margin-bottom: 12px;
+          font-size: 13px;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
+          font-weight: 700;
+          font-family: 'Inter', sans-serif;
         }
 
         .team-members ul {
           list-style: none;
+          padding: 0;
+          margin: 0;
         }
 
         .team-members li {
-          color: var(--text-muted);
-          margin: 4px 0;
-          font-weight: 500;
+          color: var(--text-secondary);
+          margin: 6px 0;
+          font-weight: 600;
+          font-size: 14px;
+          font-family: 'Inter', sans-serif;
         }
 
         .section-title {
-          font-size: 28px;
-          margin-bottom: 24px;
+          font-size: 32px;
+          margin-bottom: 28px;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
           font-weight: 800;
+          font-family: 'Orbitron', sans-serif;
         }
 
         .no-tasks {
           text-align: center;
-          padding: 60px 40px;
+          padding: 80px 40px;
         }
 
         .no-tasks-icon {
-          font-size: 64px;
-          margin-bottom: 16px;
+          font-size: 72px;
+          margin-bottom: 20px;
+          opacity: 0.6;
         }
 
         .no-tasks h3 {
-          font-size: 24px;
-          margin-bottom: 8px;
+          font-size: 26px;
+          margin-bottom: 12px;
           color: var(--text-primary);
-        }
-
-        .no-tasks p {
-          color: var(--text-muted);
-        }
-
-        .round-section {
-          padding: 24px;
-          margin-bottom: 24px;
-          border-radius: 16px;
-        }
-
-        .round-header {
-          border-left: 4px solid;
-          padding-left: 16px;
-          margin-bottom: 20px;
-        }
-
-        .round-label {
-          font-size: 20px;
-          margin-bottom: 4px;
           font-weight: 700;
         }
 
+        .no-tasks p {
+          color: var(--text-secondary);
+          font-size: 15px;
+          line-height: 1.6;
+        }
+
+        .round-section {
+          padding: 28px;
+          margin-bottom: 28px;
+          border-radius: 16px;
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .round-header {
+          border-left: 5px solid;
+          padding-left: 20px;
+          margin-bottom: 24px;
+          background: ${isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'};
+          padding: 16px 20px;
+          border-radius: 8px;
+        }
+
+        .round-label {
+          font-size: 22px;
+          margin-bottom: 6px;
+          font-weight: 800;
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 0.5px;
+        }
+
         .round-subtitle {
-          color: var(--text-muted);
+          color: var(--text-secondary);
           font-size: 14px;
-          opacity: 0.8;
+          font-weight: 600;
+          opacity: 0.9;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .tasks-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
 
         .task-item {
-          padding: 20px;
-          background: ${isDark ? 'rgba(10, 10, 26, 0.4)' : 'rgba(255, 255, 255, 0.5)'};
-          border-radius: 12px;
-          margin-bottom: 12px;
-          transition: all 0.3s ease;
-          border-left: 3px solid transparent;
-          border: 1px solid transparent;
+          padding: 24px;
+          background: ${isDark ? 'rgba(10, 10, 26, 0.5)' : 'rgba(255, 255, 255, 0.7)'};
+          border-radius: 14px;
+          margin-bottom: 0;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border-left: 4px solid transparent;
+          border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+          box-shadow: ${isDark ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)'};
         }
         
         .task-item:hover {
-          background: ${isDark ? 'rgba(10, 10, 26, 0.6)' : 'rgba(255, 255, 255, 0.8)'};
-          transform: translateX(4px);
+          background: ${isDark ? 'rgba(10, 10, 26, 0.7)' : 'rgba(255, 255, 255, 0.95)'};
+          transform: translateX(6px);
+          box-shadow: ${isDark ? '0 4px 16px rgba(0, 0, 0, 0.3)' : '0 4px 16px rgba(0, 0, 0, 0.1)'};
         }
 
         .task-item.status-pending {
-          background: ${isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.05)'};
+          background: ${isDark ? 'rgba(239, 68, 68, 0.08)' : 'rgba(239, 68, 68, 0.04)'};
           border-left-color: #ef4444;
+          border-left-width: 4px;
         }
 
         .task-item.status-progress {
-          background: ${isDark ? 'rgba(245, 158, 11, 0.05)' : 'rgba(245, 158, 11, 0.05)'};
+          background: ${isDark ? 'rgba(245, 158, 11, 0.08)' : 'rgba(245, 158, 11, 0.04)'};
           border-left-color: #f59e0b;
+          border-left-width: 4px;
         }
 
         .task-item.status-completed {
-          background: ${isDark ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.05)'};
+          background: ${isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.04)'};
           border-left-color: #10b981;
+          border-left-width: 4px;
         }
 
         .task-header-row {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 16px;
+          gap: 20px;
         }
 
         .task-left {
-            display: flex;
-            gap: 16px;
-            flex: 1;
+          display: flex;
+          gap: 18px;
+          flex: 1;
         }
 
         .task-number {
-          width: 36px;
-          height: 36px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-family: 'Orbitron', sans-serif;
-          font-weight: 700;
+          font-weight: 800;
+          font-size: 16px;
           color: white;
           flex-shrink: 0;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
 
         .task-content {
@@ -433,132 +606,197 @@ const TeamLeadDashboard = () => {
         }
 
         .task-title {
-          font-size: 16px;
-          margin-bottom: 6px;
+          font-size: 17px;
+          margin-bottom: 8px;
           color: var(--text-primary);
-          font-weight: 600;
+          font-weight: 700;
+          font-family: 'Inter', sans-serif;
+          letter-spacing: -0.2px;
         }
 
         .task-description {
           font-size: 14px;
           color: var(--text-secondary);
-          line-height: 1.6;
+          line-height: 1.7;
           margin: 0;
+          font-family: 'Inter', sans-serif;
         }
 
         .task-status-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          background: ${isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.8)'};
+          padding: 8px 12px;
+          border-radius: 24px;
+          border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.08)'};
         }
 
         .status-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0.3;
-            position: relative;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 2px solid transparent;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          opacity: 0.4;
+          position: relative;
         }
 
         .status-btn:hover {
-            opacity: 0.8;
-            transform: scale(1.15);
+          opacity: 0.9;
+          transform: scale(1.2);
         }
 
         .status-btn.active {
-            opacity: 1;
-            transform: scale(1.15);
+          opacity: 1;
+          transform: scale(1.2);
+          box-shadow: 0 0 0 3px ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
         }
         
         .status-btn.active::after {
           content: '';
           position: absolute;
-          top: -4px;
-          left: -4px;
-          right: -4px;
-          bottom: -4px;
+          top: -5px;
+          left: -5px;
+          right: -5px;
+          bottom: -5px;
           border-radius: 50%;
           border: 2px solid currentColor;
-          opacity: 0.3;
+          opacity: 0.4;
           animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
           0% { transform: scale(1); opacity: 0.5; }
-          100% { transform: scale(1.5); opacity: 0; }
+          100% { transform: scale(1.6); opacity: 0; }
         }
 
-        .status-btn.pending { background-color: #ef4444; color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
-        .status-btn.progress { background-color: #f59e0b; color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
-        .status-btn.completed { background-color: #10b981; color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+        .status-btn.pending { 
+          background-color: #ef4444; 
+          color: #ef4444; 
+          box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); 
+        }
+        
+        .status-btn.progress { 
+          background-color: #f59e0b; 
+          color: #f59e0b; 
+          box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); 
+        }
+        
+        .status-btn.completed { 
+          background-color: #10b981; 
+          color: #10b981; 
+          box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); 
+        }
 
         .status-instruction-card {
-          margin-bottom: 24px;
-          padding: 20px;
+          margin-bottom: 28px;
+          padding: 24px;
           display: flex;
           align-items: flex-start;
-          gap: 16px;
-          background: ${isDark ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.05)'};
-          border: 1px solid rgba(99, 102, 241, 0.2);
+          gap: 20px;
+          background: ${isDark ? 'rgba(124, 58, 237, 0.12)' : 'rgba(124, 58, 237, 0.06)'};
+          border: 1.5px solid ${isDark ? 'rgba(124, 58, 237, 0.3)' : 'rgba(124, 58, 237, 0.2)'};
+          border-radius: 14px;
+          box-shadow: ${isDark ? '0 4px 16px rgba(124, 58, 237, 0.15)' : '0 2px 12px rgba(124, 58, 237, 0.1)'};
         }
 
         .instruction-icon {
-          font-size: 24px;
+          font-size: 28px;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .instruction-content h3 {
-          margin: 0 0 8px 0;
+          margin: 0 0 10px 0;
           font-family: 'Orbitron', sans-serif;
-          font-size: 16px;
-          color: ${isDark ? '#818cf8' : '#4f46e5'};
+          font-size: 17px;
+          font-weight: 800;
+          color: ${isDark ? '#a78bfa' : '#7c3aed'};
+          letter-spacing: 0.5px;
         }
 
         .instruction-content p {
-          margin: 0 0 12px 0;
+          margin: 0 0 14px 0;
           font-size: 14px;
           color: var(--text-secondary);
+          line-height: 1.6;
+          font-family: 'Inter', sans-serif;
         }
 
         .status-legends {
           display: flex;
-          gap: 16px;
+          gap: 20px;
           flex-wrap: wrap;
         }
 
         .legend-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 13px;
+          gap: 10px;
+          font-size: 14px;
+          font-weight: 600;
           color: var(--text-primary);
+          font-family: 'Inter', sans-serif;
         }
 
         .legend-dot {
-          width: 12px;
-          height: 12px;
+          width: 14px;
+          height: 14px;
           border-radius: 50%;
         }
         
-        .legend-dot.pending { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
-        .legend-dot.progress { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
-        .legend-dot.completed { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+        .legend-dot.pending { 
+          background: #ef4444; 
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); 
+        }
+        
+        .legend-dot.progress { 
+          background: #f59e0b; 
+          box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); 
+        }
+        
+        .legend-dot.completed { 
+          background: #10b981; 
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); 
+        }
 
         @media (max-width: 768px) {
           .team-header {
             flex-direction: column;
             text-align: center;
             gap: 24px;
+            padding: 24px;
           }
 
           .team-header-left {
             flex-direction: column;
+            gap: 16px;
+          }
+
+          .team-number-large {
+            font-size: 56px;
+          }
+
+          .team-name-large {
+            font-size: 28px;
           }
 
           .team-members {
             text-align: center;
+          }
+
+          .task-header-row {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .task-status-actions {
+            align-self: flex-start;
+          }
+
+          .section-title {
+            font-size: 26px;
           }
         }
       `}</style>
