@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import CountdownTimer from '../../components/CountdownTimer';
+import RippleGrid from '../../components/RippleGrid';
 import { teamLeadAPI } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -87,12 +88,21 @@ const TeamLeadDashboard = () => {
   return (
     <div className="dashboard-wrapper">
       <div className="vr-background">
-        {/* Animated gradient mesh background */}
-        <div className="gradient-mesh">
-          <div className="gradient-orb orb-1"></div>
-          <div className="gradient-orb orb-2"></div>
-          <div className="gradient-orb orb-3"></div>
-          <div className="gradient-orb orb-4"></div>
+        {/* RippleGrid WebGL Background */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
+          <RippleGrid
+            enableRainbow={false}
+            gridColor={isDark ? "#8b5cf6" : "#7c3aed"}
+            rippleIntensity={0.05}
+            gridSize={10}
+            gridThickness={15}
+            mouseInteraction={true}
+            mouseInteractionRadius={1.2}
+            opacity={isDark ? 0.6 : 0.4}
+            fadeDistance={1.5}
+            vignetteStrength={2.0}
+            glowIntensity={0.15}
+          />
         </div>
         {/* Soft overlay gradient for better text readability */}
         <div className="vr-overlay"></div>

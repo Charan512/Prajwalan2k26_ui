@@ -130,11 +130,10 @@ const AdminDashboard = () => {
             (() => {
               // Filter teams based on search query and selected domain
               const filteredTeams = teams.filter(team => {
-                // Search filter
+                // Search filter - use optional chaining to prevent errors
                 const matchesSearch = searchQuery === '' ||
-                  team.teamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  team.leadName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  team.leadEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  team.teamName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  team.teamNumber?.toString().includes(searchQuery) ||
                   (team.domain && team.domain.toLowerCase().includes(searchQuery.toLowerCase()));
 
                 // Domain filter

@@ -76,12 +76,12 @@ const CountdownTimer = () => {
 
     const hoursRemaining = timeLeft / (1000 * 60 * 60);
     if (hoursRemaining > 22) return 'Prajwalan Ignited! Let the innovation begin!';
-    if (hoursRemaining > 18) return '💡 Great start! Keep brainstorming those ideas!';
-    if (hoursRemaining > 12) return '⚡ Keep going! Stay focused and energized!';
-    if (hoursRemaining > 6) return '🚀 In the zone! Your project is taking shape!';
-    if (hoursRemaining > 3) return '🏃 Sprint mode! Time to polish your work!';
-    if (hoursRemaining > 1) return '⚠️ Final hours! Get ready to present!';
-    if (hoursRemaining > 0.5) return '🎯 Last 30 minutes! Wrap up your code!';
+    if (hoursRemaining > 18) return 'Great start! Keep brainstorming those ideas!';
+    if (hoursRemaining > 12) return 'Keep going! Stay focused and energized!';
+    if (hoursRemaining > 6) return 'In the zone! Your project is taking shape!';
+    if (hoursRemaining > 3) return 'Sprint mode! Time to polish your work!';
+    if (hoursRemaining > 1) return 'Final hours! Get ready to present!';
+    if (hoursRemaining > 0.5) return 'Last 30 minutes! Wrap up your code!';
     return '⏰ Final moments! Prepare for submission!';
   };
 
