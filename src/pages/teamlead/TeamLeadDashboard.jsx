@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import CountdownTimer from '../../components/CountdownTimer';
 import RippleGrid from '../../components/RippleGrid';
+import DoomGame from '../../components/DoomGameClassic';
 import { teamLeadAPI } from '../../services/api';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -124,6 +125,12 @@ const TeamLeadDashboard = () => {
                 )}
               </div>
             </div>
+
+            {/* DOOM Game in the middle */}
+            <div className="team-header-game">
+              <DoomGame />
+            </div>
+
             <div className="team-members">
               <h4>Team Members</h4>
               <ul>
@@ -351,9 +358,10 @@ const TeamLeadDashboard = () => {
         }
 
         .team-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          display: grid;
+          grid-template-columns: 1fr 2fr 1fr;
+          gap: 24px;
+          align-items: start;
           padding: 32px;
           margin-bottom: 32px;
           animation: slideDown 0.6s ease-out;
@@ -374,6 +382,12 @@ const TeamLeadDashboard = () => {
           display: flex;
           align-items: center;
           gap: 24px;
+        }
+
+        .team-header-game {
+          width: 100%;
+          height: 100%;
+          min-height: 280px;
         }
 
         .team-number-large {
@@ -773,7 +787,7 @@ const TeamLeadDashboard = () => {
 
         @media (max-width: 768px) {
           .team-header {
-            flex-direction: column;
+            grid-template-columns: 1fr;
             text-align: center;
             gap: 24px;
             padding: 24px;
@@ -782,6 +796,11 @@ const TeamLeadDashboard = () => {
           .team-header-left {
             flex-direction: column;
             gap: 16px;
+          }
+
+          .team-header-game {
+            min-height: 240px;
+            order: 2;
           }
 
           .team-number-large {
@@ -794,6 +813,7 @@ const TeamLeadDashboard = () => {
 
           .team-members {
             text-align: center;
+            order: 3;
           }
 
           .task-header-row {
