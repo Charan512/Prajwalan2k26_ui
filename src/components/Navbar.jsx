@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -7,6 +8,44 @@ const Navbar = () => {
   const { toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeSection, setActiveSection] = useState('top');
+
+  // Track scroll position to determine active section
+  useEffect(() => {
+    if (location.pathname !== '/team') {
+      setActiveSection(null);
+      return;
+    }
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100; // Offset for navbar height
+
+      // Check if at top
+      if (scrollPosition < 200) {
+        setActiveSection('top');
+        return;
+      }
+
+      // Check each section
+      const timerElement = document.getElementById('timer');
+      const tasksElement = document.getElementById('tasks');
+
+      if (tasksElement && scrollPosition >= tasksElement.offsetTop) {
+        setActiveSection('tasks');
+      } else if (timerElement && scrollPosition >= timerElement.offsetTop) {
+        setActiveSection('timer');
+      } else {
+        setActiveSection('top');
+      }
+    };
+
+    // Initial check
+    handleScroll();
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -27,7 +66,10 @@ const Navbar = () => {
         ];
       case 'team_lead':
         return [
-          { path: '/team', label: 'Dashboard' }
+          { path: '/team', label: 'Dashboard', scrollTo: 'top' },
+          { path: '/team', label: 'Timer', scrollTo: 'timer' },
+          { path: '/team', label: 'Tasks', scrollTo: 'tasks' },
+          { path: '/team/game-leaderboard', label: 'Leaderboard', isRoute: true }
         ];
       default:
         return [];
@@ -57,15 +99,49 @@ const Navbar = () => {
 
       <div className="navbar-center">
         <div className="navbar-nav">
-          {getNavLinks().map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {getNavLinks().map((link, index) => {
+            const handleClick = (e) => {
+              if (link.scrollTo) {
+                e.preventDefault();
+                // Only scroll if we're on the /team page
+                if (location.pathname === '/team') {
+                  if (link.scrollTo === 'top') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    const element = document.getElementById(link.scrollTo);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }
+                } else {
+                  // Navigate to /team first, then scroll will happen on page load
+                  navigate('/team');
+                }
+              }
+            };
+
+            // Determine if this link should be active
+            const isActive = () => {
+              if (link.scrollTo) {
+                // For scroll-based links, check if this specific section is active
+                return location.pathname === '/team' && activeSection === link.scrollTo;
+              } else {
+                // For route-based links, check if path matches
+                return location.pathname === link.path;
+              }
+            };
+
+            return (
+              <Link
+                key={`${link.path}-${index}`}
+                to={link.path}
+                onClick={handleClick}
+                className={`nav-link ${isActive() ? 'active' : ''} ${link.isRoute ? 'nav-link-route' : ''}`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
 

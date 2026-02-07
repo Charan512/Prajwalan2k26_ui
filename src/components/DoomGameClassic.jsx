@@ -1,26 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { FaHeart, FaStar, FaCrosshairs, FaTrophy, FaGamepad, FaSkull } from 'react-icons/fa';
+import { GiDevilMask } from 'react-icons/gi';
+import api from '../services/api';
 
-const DoomGame = () => {
+const DoomGame = ({ fullscreen = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  const [highScore, setHighScore] = useState(() => {
+    const saved = localStorage.getItem('doomHighScore');
+    return saved ? parseInt(saved) : 0;
+  });
   const [gameOver, setGameOver] = useState(false);
   const [ammo, setAmmo] = useState(30); // Start with 30 ammo
   const [health, setHealth] = useState(100);
   const canvasRef = useRef(null);
   const gameLoopRef = useRef(null);
+  const ammoRef = useRef(ammo); // Ref to track ammo without re-binding listeners
   const { isDark } = useTheme();
 
-  // Game constants
-  const CANVAS_WIDTH = 400;
-  const CANVAS_HEIGHT = 300;
-  const PLAYER_SIZE = 15;
-  const ENEMY_SIZE = 20;
-  const BULLET_SIZE = 5;
-  const PLAYER_SPEED = 4;
-  const BULLET_SPEED = 10;
-  const ENEMY_SPEED = 1.5;
+  // Keep ammoRef in sync with ammo state
+  useEffect(() => {
+    ammoRef.current = ammo;
+  }, [ammo]);
+
+
+  // Game constants - larger when fullscreen
+  const CANVAS_WIDTH = fullscreen ? 800 : 400;
+  const CANVAS_HEIGHT = fullscreen ? 600 : 300;
+  const PLAYER_SIZE = fullscreen ? 20 : 15;
+  const ENEMY_SIZE = fullscreen ? 28 : 20;
+  const BULLET_SIZE = fullscreen ? 7 : 5;
+  const PLAYER_SPEED = fullscreen ? 5 : 4;
+  const BULLET_SPEED = fullscreen ? 12 : 10;
+  const ENEMY_SPEED = fullscreen ? 2 : 1.5;
 
   // Game state refs
   const playerRef = useRef({
@@ -37,6 +50,14 @@ const DoomGame = () => {
   const mouseRef = useRef({ x: CANVAS_WIDTH / 2, y: 0 });
   const ammoPickupsRef = useRef([]); // Ammo pickups array
 
+  const scoreRef = useRef(0);
+  const highScoreRef = useRef(highScore);
+
+  // Sync highScoreRef
+  useEffect(() => {
+    highScoreRef.current = highScore;
+  }, [highScore]);
+
   const resetGame = () => {
     playerRef.current = { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 40, angle: 0 };
     bulletsRef.current = [];
@@ -46,6 +67,7 @@ const DoomGame = () => {
     enemySpawnTimerRef.current = 0;
     frameCountRef.current = 0;
     setScore(0);
+    scoreRef.current = 0; // Sync ref
     setAmmo(30); // Start with 30 ammo
     setHealth(100);
     setGameOver(false);
@@ -59,10 +81,13 @@ const DoomGame = () => {
 
   const stopGame = () => {
     setIsPlaying(false);
+    setGameOver(false); // Reset game over state when closing
     if (gameLoopRef.current) {
       cancelAnimationFrame(gameLoopRef.current);
     }
   };
+
+
 
   const createParticles = (x, y, color, count = 12) => {
     for (let i = 0; i < count; i++) {
@@ -78,7 +103,7 @@ const DoomGame = () => {
   };
 
   const shootBullet = () => {
-    if (ammo <= 0) return; // Check ammo
+    if (ammoRef.current <= 0) return; // Check reliable ref instead of potentially stale state
 
     const player = playerRef.current;
     const angle = player.angle;
@@ -90,7 +115,7 @@ const DoomGame = () => {
       vy: -Math.cos(angle) * BULLET_SPEED
     });
 
-    setAmmo(prev => prev - 1); // Deduct ammo
+    setAmmo(prev => Math.max(0, prev - 1)); // Deduct ammo, never go below 0
   };
 
   const spawnEnemy = () => {
@@ -429,10 +454,13 @@ const DoomGame = () => {
           const newHealth = Math.max(0, prev - 10); // Lose 10% HP when enemy hits
           if (newHealth <= 0) {
             setGameOver(true);
-            if (score > highScore) {
-              setHighScore(score);
-              localStorage.setItem('doomHighScore', score.toString());
+            setIsPlaying(false); // Stop the game
+            if (scoreRef.current > highScoreRef.current) {
+              highScoreRef.current = scoreRef.current;
+              setHighScore(scoreRef.current);
+              localStorage.setItem('doomHighScore', scoreRef.current.toString());
             }
+            api.post('/game/score', { score: scoreRef.current }).catch(console.error);
           }
           return newHealth;
         });
@@ -446,10 +474,13 @@ const DoomGame = () => {
           const newHealth = Math.max(0, prev - 10); // Lose 10% HP when enemy escapes
           if (newHealth <= 0) {
             setGameOver(true);
-            if (score > highScore) {
-              setHighScore(score);
-              localStorage.setItem('doomHighScore', score.toString());
+            setIsPlaying(false); // Stop the game
+            if (scoreRef.current > highScoreRef.current) {
+              highScoreRef.current = scoreRef.current;
+              setHighScore(scoreRef.current);
+              localStorage.setItem('doomHighScore', scoreRef.current.toString());
             }
+            api.post('/game/score', { score: scoreRef.current }).catch(console.error);
           }
           return newHealth;
         });
@@ -475,7 +506,8 @@ const DoomGame = () => {
           if (enemy.health <= 0) {
             createParticles(enemy.x + ENEMY_SIZE / 2, enemy.y + ENEMY_SIZE / 2, '#ff4444', 20);
             const points = enemy.type === 'tank' ? 30 : enemy.type === 'fast' ? 20 : 10;
-            setScore(prev => prev + points);
+            scoreRef.current += points;
+            setScore(scoreRef.current);
             // No ammo drop needed - unlimited ammo!
             return false;
           }
@@ -526,12 +558,7 @@ const DoomGame = () => {
     gameLoopRef.current = requestAnimationFrame(gameLoop);
   };
 
-  useEffect(() => {
-    const savedHighScore = localStorage.getItem('doomHighScore');
-    if (savedHighScore) {
-      setHighScore(parseInt(savedHighScore));
-    }
-  }, []);
+
 
   useEffect(() => {
     if (isPlaying && !gameOver) {
@@ -547,7 +574,7 @@ const DoomGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [isPlaying, gameOver, isDark]);
+  }, [isPlaying, gameOver]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -574,7 +601,8 @@ const DoomGame = () => {
     };
 
     const handleClick = (e) => {
-      if (!isPlaying || gameOver) return;
+      // Use ref for current check to avoid stale closures
+      if (!isPlaying || gameOver || ammoRef.current <= 0) return;
       e.preventDefault();
       shootBullet();
     };
@@ -595,45 +623,84 @@ const DoomGame = () => {
         canvasRef.current.removeEventListener('click', handleClick);
       }
     };
-  }, [isPlaying, gameOver, ammo]);
+  }, [isPlaying, gameOver]);
 
   return (
     <>
       <div className="doom-game-container">
-        {!isPlaying ? (
-          <div className="game-placeholder" onClick={startGame}>
-            <div className="game-icon">👹</div>
+        {!isPlaying && !gameOver ? (
+          <div className="game-placeholder">
+            <div className="game-icon"><GiDevilMask /></div>
             <div className="game-text">
               <h3>Take a Break!</h3>
-              <p>Click to play DOOM-Style Shooter</p>
+              <p>DOOM-Style Shooter</p>
             </div>
+            <button className="game-start-btn" onClick={startGame}>
+              <span className="start-icon"><FaGamepad /></span>
+              START GAME
+            </button>
             <div className="game-hint">Fight the Demons!</div>
             {highScore > 0 && (
-              <div className="high-score-badge">High Score: {highScore}</div>
+              <div className="high-score-badge"><FaTrophy /> High Score: {highScore}</div>
             )}
+          </div>
+        ) : !isPlaying && gameOver ? (
+          <div className="game-over-screen" onClick={startGame}>
+            <div className="game-over-content">
+              <h2 className="game-over-title"><FaSkull /> GAME OVER <FaSkull /></h2>
+              <div className="final-score">
+                <div className="score-label">Final Score</div>
+                <div className="score-value">{score}</div>
+              </div>
+              {score > highScore && (
+                <div className="new-record"><FaTrophy /> NEW HIGH SCORE! <FaTrophy /></div>
+              )}
+              {score <= highScore && highScore > 0 && (
+                <div className="high-score-display">
+                  <span>Best: {highScore}</span>
+                </div>
+              )}
+              <div className="play-again-hint">
+                Click to Play Again
+              </div>
+            </div>
           </div>
         ) : (
           <div className="game-wrapper">
-            <div className="game-header">
-              <div className="stat-display health">
-                <span className="stat-label">HP:</span>
-                <span className="stat-value" style={{ color: health > 50 ? '#00ff00' : health > 25 ? '#ffff00' : '#ff0000' }}>
-                  {health}%
-                </span>
-              </div>
-              <div className="stat-display">
-                <span className="stat-label">Score:</span>
-                <span className="stat-value">{score}</span>
-              </div>
-              <div className="stat-display ammo">
-                <span className="stat-label">Ammo:</span>
-                <span className="stat-value" style={{ color: ammo > 20 ? '#00ff00' : ammo > 10 ? '#ffaa00' : '#ff0000' }}>
-                  {ammo}
-                </span>
-              </div>
-              <div className="stat-display">
-                <span className="stat-label">Best:</span>
-                <span className="stat-value">{highScore}</span>
+            <div className="game-header" style={{ maxWidth: CANVAS_WIDTH }}>
+              <div className="stats-container">
+                <div className="stat-display health">
+                  <span className="stat-icon"><FaHeart /></span>
+                  <div className="stat-info">
+                    <span className="stat-label">Health</span>
+                    <span className="stat-value" style={{ color: health > 50 ? '#00ff00' : health > 25 ? '#ffff00' : '#ff0000' }}>
+                      {health}%
+                    </span>
+                  </div>
+                </div>
+                <div className="stat-display score">
+                  <span className="stat-icon"><FaStar /></span>
+                  <div className="stat-info">
+                    <span className="stat-label">Score</span>
+                    <span className="stat-value">{score}</span>
+                  </div>
+                </div>
+                <div className="stat-display ammo">
+                  <span className="stat-icon"><FaCrosshairs /></span>
+                  <div className="stat-info">
+                    <span className="stat-label">Ammo</span>
+                    <span className="stat-value" style={{ color: ammo > 20 ? '#00ff00' : ammo > 10 ? '#ffaa00' : '#ff0000' }}>
+                      {ammo}
+                    </span>
+                  </div>
+                </div>
+                <div className="stat-display best">
+                  <span className="stat-icon"><FaTrophy /></span>
+                  <div className="stat-info">
+                    <span className="stat-label">Best</span>
+                    <span className="stat-value">{highScore}</span>
+                  </div>
+                </div>
               </div>
               <button className="game-control-btn close" onClick={stopGame} title="Close Game">
                 ✕
@@ -647,18 +714,6 @@ const DoomGame = () => {
               className="game-canvas"
             />
 
-            {gameOver && (
-              <div className="game-over-overlay">
-                <div className="game-over-content">
-                  <h2>You Died!</h2>
-                  <p className="final-score">Score: {score}</p>
-                  {score > highScore && <p className="new-record">🎉 New High Score!</p>}
-                  <button className="play-again-btn" onClick={startGame}>
-                    Respawn
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div className="game-instructions">
               <span>WASD/Arrows: Move</span>
@@ -692,97 +747,87 @@ const DoomGame = () => {
           justify-content: center;
           background: ${isDark
           ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)'
-          : 'linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(219, 39, 119, 0.08) 100%)'};
+          : 'linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(219, 39, 119, 0.08) 100%)'
+        };
           border: 2px dashed ${isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(124, 58, 237, 0.2)'};
           border-radius: 12px;
           cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
+          box-shadow: ${isDark
+          ? '0 0 20px rgba(139, 92, 246, 0.1), inset 0 0 20px rgba(0,0,0,0.5)'
+          : '0 0 20px rgba(124, 58, 237, 0.05), inset 0 0 20px rgba(255,255,255,0.5)'};
         }
 
         .game-placeholder::before {
           content: '';
           position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            45deg,
-            transparent 30%,
-            ${isDark ? 'rgba(139, 92, 246, 0.05)' : 'rgba(124, 58, 237, 0.03)'} 50%,
-            transparent 70%
-          );
-          animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-          100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(circle at center, ${isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(124, 58, 237, 0.05)'} 0%, transparent 70%);
+          z-index: 0;
         }
 
         .game-placeholder:hover {
-          background: ${isDark
-          ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%)'
-          : 'linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(219, 39, 119, 0.12) 100%)'};
-          border-color: ${isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(124, 58, 237, 0.4)'};
-          transform: scale(1.02);
+          border-color: ${isDark ? 'rgba(139, 92, 246, 0.8)' : 'rgba(124, 58, 237, 0.6)'};
+          transform: translateY(-5px);
           box-shadow: ${isDark
-          ? '0 8px 32px rgba(139, 92, 246, 0.2)'
-          : '0 8px 32px rgba(124, 58, 237, 0.15)'};
+          ? '0 15px 40px rgba(139, 92, 246, 0.3), inset 0 0 30px rgba(139, 92, 246, 0.1)'
+          : '0 15px 40px rgba(124, 58, 237, 0.2), inset 0 0 30px rgba(124, 58, 237, 0.05)'
+        };
         }
 
         .game-icon {
-          font-size: 64px;
-          margin-bottom: 16px;
-          animation: pulse 2s ease-in-out infinite;
-          filter: drop-shadow(0 4px 12px ${isDark ? 'rgba(255, 68, 68, 0.6)' : 'rgba(220, 38, 38, 0.4)'});
+          font-size: 80px;
+          margin-bottom: 20px;
+          /* animation: float removed */
+          filter: drop-shadow(0 0 20px ${isDark ? 'rgba(239, 68, 68, 0.8)' : 'rgba(220, 38, 38, 0.6)'});
+          color: ${isDark ? '#ef4444' : '#dc2626'};
+          position: relative;
+          z-index: 1;
         }
 
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
+        /* @keyframes float removed */
 
         .game-text {
           text-align: center;
           position: relative;
           z-index: 1;
+          margin-bottom: 10px;
         }
 
         .game-text h3 {
           font-family: 'Orbitron', sans-serif;
-          font-size: 24px;
-          font-weight: 800;
+          font-size: 32px;
+          font-weight: 900;
           margin: 0 0 8px 0;
-          background: ${isDark
-          ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-          : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'};
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #ffffff;
+          text-shadow: 0 0 10px ${isDark ? 'rgba(239, 68, 68, 0.8)' : 'rgba(220, 38, 38, 0.6)'};
+          letter-spacing: 2px;
+          text-transform: uppercase;
         }
 
         .game-text p {
-          font-size: 14px;
-          color: ${isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(30, 41, 59, 0.7)'};
+          font-size: 16px;
+          color: ${isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(30, 41, 59, 0.9)'};
           margin: 0;
-          font-weight: 600;
+          font-weight: 500;
+          letter-spacing: 1px;
         }
 
         .game-hint {
-          margin-top: 12px;
-          font-size: 11px;
-          color: ${isDark ? 'rgba(239, 68, 68, 0.9)' : 'rgba(220, 38, 38, 0.9)'};
+          margin-top: 24px;
+          font-size: 12px;
+          color: ${isDark ? '#fbbf24' : '#f59e0b'};
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 3px;
           font-weight: 700;
-          padding: 4px 12px;
-          background: ${isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(220, 38, 38, 0.1)'};
-          border-radius: 12px;
           position: relative;
           z-index: 1;
+          opacity: 0.8;
         }
 
         .high-score-badge {
@@ -793,6 +838,63 @@ const DoomGame = () => {
           position: relative;
           z-index: 1;
         }
+
+        .game-start-btn {
+          margin: 20px 0;
+          padding: 16px 48px;
+          font-size: 18px;
+          font-weight: 800;
+          color: ${isDark ? '#ffffff' : '#ffffff'};
+          background: linear-gradient(135deg, ${isDark ? '#8b5cf6' : '#7c3aed'} 0%, ${isDark ? '#ec4899' : '#db2777'} 100%);
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          box-shadow: 0 4px 20px ${isDark ? 'rgba(139, 92, 246, 0.4)' : 'rgba(124, 58, 237, 0.3)'};
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          /* animation: pulse-glow removed */
+        }
+
+        .game-start-btn:hover {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 30px ${isDark ? 'rgba(139, 92, 246, 0.6)' : 'rgba(124, 58, 237, 0.5)'};
+          background: linear-gradient(135deg, ${isDark ? '#9333ea' : '#8b5cf6'} 0%, ${isDark ? '#f472b6' : '#ec4899'} 100%);
+        }
+
+        .game-start-btn:active {
+          transform: translateY(0) scale(1);
+        }
+
+        .start-icon {
+          font-size: 24px;
+          /* animation: bounce-icon removed */
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 4px 20px ${isDark ? 'rgba(139, 92, 246, 0.4)' : 'rgba(124, 58, 237, 0.3)'};
+          }
+          50% {
+            box-shadow: 0 4px 30px ${isDark ? 'rgba(139, 92, 246, 0.6)' : 'rgba(124, 58, 237, 0.5)'};
+          }
+        }
+
+        @keyframes bounce-icon {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-4px);
+          }
+        }
+
+
 
         .game-wrapper {
           width: 100%;
@@ -809,28 +911,53 @@ const DoomGame = () => {
 
         .game-header {
           display: flex;
-          gap: 12px;
+          gap: 16px;
           align-items: center;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
           width: 100%;
-          max-width: ${CANVAS_WIDTH}px;
           justify-content: space-between;
+        }
+
+        .stats-container {
+          display: flex;
+          gap: 12px;
           flex-wrap: wrap;
+          flex: 1;
         }
 
         .stat-display {
           display: flex;
           align-items: center;
-          gap: 6px;
-          background: ${isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.6)'};
-          padding: 4px 10px;
-          border-radius: 6px;
-          border: 1px solid ${isDark ? 'rgba(239, 68, 68, 0.3)' : 'rgba(220, 38, 38, 0.3)'};
+          gap: 10px;
+          background: ${isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.5)'};
+          padding: 10px 16px;
+          border-radius: 10px;
+          border: 2px solid ${isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(124, 58, 237, 0.3)'};
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+          min-width: 110px;
+        }
+
+        .stat-display:hover {
+          transform: translateY(-2px);
+          border-color: ${isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(124, 58, 237, 0.5)'};
+          box-shadow: 0 4px 12px ${isDark ? 'rgba(139, 92, 246, 0.2)' : 'rgba(124, 58, 237, 0.2)'};
+        }
+
+        .stat-icon {
+          font-size: 20px;
+          line-height: 1;
+        }
+
+        .stat-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
         }
 
         .stat-label {
-          font-size: 10px;
-          color: rgba(255, 255, 255, 0.7);
+          font-size: 9px;
+          color: ${isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.7)'};
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -838,10 +965,11 @@ const DoomGame = () => {
 
         .stat-value {
           font-family: 'Orbitron', monospace;
-          font-size: 14px;
+          font-size: 16px;
           font-weight: 800;
-          color: #ff4444;
-          text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+          color: ${isDark ? '#a78bfa' : '#8b5cf6'};
+          text-shadow: 0 0 8px ${isDark ? 'rgba(167, 139, 250, 0.5)' : 'rgba(139, 92, 246, 0.5)'};
+          line-height: 1;
         }
 
         .game-control-btn {
@@ -870,7 +998,8 @@ const DoomGame = () => {
           border-radius: 8px;
           box-shadow: ${isDark
           ? '0 8px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(239, 68, 68, 0.3)'
-          : '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(220, 38, 38, 0.2)'};
+          : '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px rgba(220, 38, 38, 0.2)'
+        };
           cursor: crosshair;
         }
 
@@ -1001,7 +1130,141 @@ const DoomGame = () => {
             font-size: 12px;
           }
         }
-      `}</style>
+
+        /* Game Over Screen Styles */
+        .game-over-screen {
+          width: 100%;
+          height: 100%;
+          min-height: 280px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: ${isDark
+          ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(127, 29, 29, 0.3) 100%)'
+          : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.2) 100%)'
+        };
+          border: 2px solid ${isDark ? 'rgba(220, 38, 38, 0.4)' : 'rgba(220, 38, 38, 0.3)'};
+          border-radius: 12px;
+          cursor: pointer;
+          animation: fadeIn 0.5s ease;
+          position: relative;
+          z-index: 10;
+        }
+
+
+.game-over-content {
+  text-align: center;
+  padding: 30px;
+  animation: slideUp 0.5s ease;
+  color: ${isDark ? '#e5e7eb' : '#1f2937'};
+}
+
+.game-over-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: ${isDark ? '#f87171' : '#dc2626'};
+  margin-bottom: 20px;
+  text-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.final-score {
+  margin: 20px 0;
+  background: ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'};
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.score-label {
+  font-size: 14px;
+  color: ${isDark ? '#9ca3af' : '#6b7280'};
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.score-value {
+  font-size: 42px;
+  font-weight: 900;
+  color: ${isDark ? '#fbbf24' : '#f59e0b'};
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.new-record {
+  font-size: 18px;
+  font-weight: 700;
+  color: ${isDark ? '#fbbf24' : '#f59e0b'};
+  margin: 15px 0;
+  animation: bounce 1s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.high-score-display {
+  font-size: 14px;
+  color: ${isDark ? '#d1d5db' : '#4b5563'};
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.play-again-hint {
+  margin-top: 25px;
+  font-size: 14px;
+  color: ${isDark ? '#a78bfa' : '#7c3aed'};
+  font-weight: 600;
+  animation: blink 1.5s infinite;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+`}</style>
     </>
   );
 };

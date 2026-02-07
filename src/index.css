@@ -245,13 +245,14 @@ input[type="checkbox"] {
 
 /* Layout */
 .container {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
 .page-wrapper {
-  padding: 24px 0 40px 0;
+  padding: 94px 0 40px 0;
+  /* 70px navbar height + 24px spacing */
   min-height: calc(100vh - 70px);
 }
 
@@ -266,8 +267,10 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(139, 92, 246, 0.05) inset;
 }
@@ -290,7 +293,7 @@ input[type="checkbox"] {
 
 .navbar-nav {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .nav-link {
@@ -300,9 +303,11 @@ input[type="checkbox"] {
   font-size: 14px;
   padding: 10px 18px;
   border-radius: 8px;
+  border: 1px solid transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .nav-link::before {
@@ -330,6 +335,30 @@ input[type="checkbox"] {
 
 .nav-link:hover::before {
   transform: translateX(-50%) scaleX(0.8);
+}
+
+/* Route-based navigation link styling */
+.nav-link-route {
+  position: relative;
+  padding-left: 14px;
+}
+
+.nav-link-route::after {
+  content: '→';
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.nav-link-route:hover::after {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.nav-link-route.active {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
 }
 
 /* Dashboard Grid */

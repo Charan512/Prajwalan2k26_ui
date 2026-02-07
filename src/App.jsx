@@ -11,6 +11,7 @@ import EvaluatorDashboard from './pages/evaluator/EvaluatorDashboard';
 import EvaluatorTeamDetail from './pages/evaluator/EvaluatorTeamDetail';
 import FlashRound from './pages/evaluator/FlashRound';
 import TeamLeadDashboard from './pages/teamlead/TeamLeadDashboard';
+import GameLeaderboard from './components/GameLeaderboard';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
@@ -108,6 +109,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['team_lead']}>
                     <TeamLeadDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/team/game-leaderboard"
+                element={
+                  <ProtectedRoute allowedRoles={['team_lead']}>
+                    <GameLeaderboard />
                   </ProtectedRoute>
                 }
               />
