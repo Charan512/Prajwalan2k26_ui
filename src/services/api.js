@@ -51,8 +51,10 @@ export const adminAPI = {
     publishAll: (round) => api.post('/admin/publish-all', { round }),
     selectFlashRound: (teamId, maxScore) => api.post(`/admin/teams/${teamId}/flash-round`, { maxScore }),
     removeFlashRound: (teamId) => api.delete(`/admin/teams/${teamId}/flash-round`),
-    getLeaderboard: () => api.get('/admin/leaderboard')
+    getLeaderboard: () => api.get('/admin/leaderboard'),
+    updateFacultyScore: (teamId, round, facultyScore) => api.put(`/admin/teams/${teamId}/faculty-score/${round}`, { facultyScore })
 };
+
 
 // Evaluator API
 export const evaluatorAPI = {

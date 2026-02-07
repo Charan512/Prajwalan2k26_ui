@@ -281,7 +281,7 @@ export const GridScan = ({
     gridScale = 0.1,
     lineStyle = 'solid',
     lineJitter = 0.1,
-    scanDirection = 'pingpong',
+    scanDirection = 'backward',
     enablePost = true,
     bloomIntensity = 0,
     bloomThreshold = 0,
@@ -291,11 +291,12 @@ export const GridScan = ({
     scanGlow = 0.5,
     scanSoftness = 2,
     scanPhaseTaper = 0.9,
-    scanDuration = 2.0,
-    scanDelay = 2.0,
+    scanDuration = 2.5,
+    scanDelay = 0.5,
     enableGyro = false,
     scanOnClick = false,
     snapBackDelay = 250,
+    disableMouseInteraction = false,
     className,
     style
 }) => {
@@ -356,6 +357,8 @@ export const GridScan = ({
     const yBoost = THREE.MathUtils.lerp(1.2, 1.6, s);
 
     useEffect(() => {
+        if (disableMouseInteraction) return; // Skip mouse interaction if disabled
+
         const el = containerRef.current;
         if (!el) return;
         let leaveTimer = null;
@@ -415,7 +418,7 @@ export const GridScan = ({
             if (scanOnClick) el.removeEventListener('click', onClick);
             if (leaveTimer) clearTimeout(leaveTimer);
         };
-    }, [uiFaceActive, snapBackDelay, scanOnClick, enableGyro]);
+    }, [uiFaceActive, snapBackDelay, scanOnClick, enableGyro, disableMouseInteraction]);
 
     useEffect(() => {
         const container = containerRef.current;

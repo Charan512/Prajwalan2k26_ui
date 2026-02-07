@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLeaderboard from './pages/admin/AdminLeaderboard';
 import AdminTeamDetail from './pages/admin/AdminTeamDetail';
+import AdminScoreEditor from './pages/admin/AdminScoreEditor';
 import EvaluatorDashboard from './pages/evaluator/EvaluatorDashboard';
 import EvaluatorTeamDetail from './pages/evaluator/EvaluatorTeamDetail';
 import FlashRound from './pages/evaluator/FlashRound';
@@ -65,6 +66,14 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <AdminLeaderboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/scores"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminScoreEditor />
                   </ProtectedRoute>
                 }
               />

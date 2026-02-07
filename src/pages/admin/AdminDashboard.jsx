@@ -50,7 +50,7 @@ const AdminDashboard = () => {
         <Navbar />
         {/* Background Layer */}
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          <Boxes />
+          <Boxes disableHover />
         </div>
 
         <div className="page-wrapper" style={{ position: 'relative', zIndex: 10 }}>
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
       <Navbar />
       {/* Background Layer - Fixed to viewport */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <Boxes className="opacity-20" />
+        <Boxes className="opacity-20" disableHover />
       </div>
 
       <div className="page-wrapper" style={{ position: 'relative', zIndex: 10 }}>
@@ -79,7 +79,9 @@ const AdminDashboard = () => {
             <h1 className="page-title">
               <span className="gradient-text">Admin Dashboard</span>
             </h1>
-            <p className="page-subtitle">Manage {teams.length} Teams • Assign Tasks • View Scores</p>
+            <p className="page-subtitle">
+              Manage {teams.length} Teams • Assign Tasks • <span className="hidden-link" onClick={() => navigate('/admin/scores')}>View Scores</span>
+            </p>
           </div>
 
           {/* Search and Filter Section */}
@@ -318,6 +320,11 @@ const AdminDashboard = () => {
           color: var(--text-secondary);
           font-size: 16px;
         }
+
+        .hidden-link {
+          cursor: default;
+        }
+
 
         .scores-row {
           display: flex;

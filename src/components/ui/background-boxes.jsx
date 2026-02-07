@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
-export const Boxes = ({ className, ...rest }) => {
+export const Boxes = ({ className, disableHover = false, ...rest }) => {
     // Much smaller grid for better performance
     const rows = new Array(15).fill(1);  // Balanced for coverage
     const cols = new Array(20).fill(1);  // Balanced for coverage
@@ -41,7 +41,7 @@ export const Boxes = ({ className, ...rest }) => {
                 >
                     {cols.map((_, j) => (
                         <motion.div
-                            whileHover={{
+                            whileHover={disableHover ? {} : {
                                 backgroundColor: getRandomColor(),
                                 transition: { duration: 0 },
                             }}

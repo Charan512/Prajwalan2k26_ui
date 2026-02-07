@@ -72,6 +72,7 @@ const AdminLeaderboard = () => {
           scanColor={isDark ? "#f59e0b" : "#3b82f6"}
           scanOpacity={0.2}
           enablePost
+          disableMouseInteraction
         />
         <div className="vr-overlay"></div>
       </div>
