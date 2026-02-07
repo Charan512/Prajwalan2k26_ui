@@ -60,7 +60,7 @@ export const evaluatorAPI = {
     getTeams: () => api.get('/evaluator/teams'),
     getTeam: (teamId) => api.get(`/evaluator/teams/${teamId}`),
     searchTeam: (teamNumber) => api.get(`/evaluator/search/${teamNumber}`),
-    submitScore: (teamId, round, score, feedback) => api.post(`/evaluator/teams/${teamId}/score/${round}`, { score, feedback }),
+    submitScore: (teamId, round, score, feedback, parameters = {}) => api.post(`/evaluator/teams/${teamId}/score/${round}`, { score, feedback, parameters }),
     getFlashRoundTeams: () => api.get('/evaluator/flash-round-teams')
 };
 
