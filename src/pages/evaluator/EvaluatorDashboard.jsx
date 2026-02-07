@@ -170,15 +170,15 @@ const EvaluatorDashboard = () => {
                             <div className="stats-grid mt-4">
                                 <div className="stat-box">
                                     <label>R1</label>
-                                    <div className="stat-value">{searchResult.scores?.round1?.score ?? '-'}</div>
+                                    <div className="stat-value">{searchResult.scores?.round1?.finalScore ?? '-'}</div>
                                 </div>
                                 <div className="stat-box">
                                     <label>R2</label>
-                                    <div className="stat-value">{searchResult.scores?.round2?.score ?? '-'}</div>
+                                    <div className="stat-value">{searchResult.scores?.round2?.finalScore ?? '-'}</div>
                                 </div>
                                 <div className="stat-box">
                                     <label>R3</label>
-                                    <div className="stat-value">{searchResult.scores?.round3?.score ?? '-'}</div>
+                                    <div className="stat-value">{searchResult.scores?.round3?.finalScore ?? '-'}</div>
                                 </div>
                                 <div className="stat-box total">
                                     <label>TOTAL</label>
@@ -214,11 +214,11 @@ const EvaluatorDashboard = () => {
                                         <h3 className="card-title">{team.teamName}</h3>
 
                                         <div className="progress-track">
-                                            <div className="progress-step completed">R1: {team.scores?.round1?.score ?? '-'}</div>
+                                            <div className="progress-step completed">R1: {team.scores?.round1?.finalScore ?? '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className="progress-step">R2: {team.scores?.round2?.score ?? '-'}</div>
+                                            <div className="progress-step">R2: {team.scores?.round2?.finalScore ?? '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className="progress-step">R3: {team.scores?.round3?.score ?? '-'}</div>
+                                            <div className="progress-step">R3: {team.scores?.round3?.finalScore ?? '-'}</div>
                                         </div>
 
                                         <div className="card-footer">
