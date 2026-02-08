@@ -427,7 +427,9 @@ export const GridScan = ({
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         rendererRef.current = renderer;
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        const containerW = Math.max(1, container.clientWidth);
+        const containerH = Math.max(1, container.clientHeight);
+        renderer.setSize(containerW, containerH);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.NoToneMapping;
         renderer.autoClear = false;
@@ -436,7 +438,7 @@ export const GridScan = ({
 
         const uniforms = {
             iResolution: {
-                value: new THREE.Vector3(container.clientWidth, container.clientHeight, renderer.getPixelRatio())
+                value: new THREE.Vector3(containerW, containerH, renderer.getPixelRatio())
             },
             iTime: { value: 0 },
             uSkew: { value: new THREE.Vector2(0, 0) },
@@ -504,9 +506,11 @@ export const GridScan = ({
         }
 
         const onResize = () => {
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            material.uniforms.iResolution.value.set(container.clientWidth, container.clientHeight, renderer.getPixelRatio());
-            if (composerRef.current) composerRef.current.setSize(container.clientWidth, container.clientHeight);
+            const w = Math.max(1, container.clientWidth);
+            const h = Math.max(1, container.clientHeight);
+            renderer.setSize(w, h);
+            material.uniforms.iResolution.value.set(w, h, renderer.getPixelRatio());
+            if (composerRef.current) composerRef.current.setSize(w, h);
         };
         window.addEventListener('resize', onResize);
 

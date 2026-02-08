@@ -228,8 +228,8 @@ const Navbar = () => {
         }
 
         .brand-text {
-          font-family: 'Orbitron', sans-serif;
-          font-size: 18px;
+          font-family: 'Samarkan', sans-serif;
+          font-size: 24px;
           font-weight: 700;
           color: var(--text-primary);
           letter-spacing: 1.5px;

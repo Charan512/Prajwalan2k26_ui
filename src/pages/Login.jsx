@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { GridScan } from '../components/GridScan';
-import PixelCard from '../components/PixelCard';
 import ShinyText from '../components/ShinyText';
 import toast from 'react-hot-toast';
 
@@ -110,11 +109,7 @@ const Login = () => {
 
       {/* Login Box */}
       <div className="login-container fade-in">
-        <PixelCard
-          variant={isDark ? "pink" : "blue"}
-          colors={isDark ? "#fecdd3,#fda4af,#e11d48" : "#e0f2fe,#7dd3fc,#0ea5e9"}
-          className="login-pixel-card"
-        >
+        <div className="login-card">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -178,7 +173,7 @@ const Login = () => {
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
-        </PixelCard>
+        </div>
 
         <div className="login-footer">
           <ShinyText
@@ -275,11 +270,10 @@ const Login = () => {
           position: relative;
         }
 
-        .login-pixel-card {
-          width: 100% !important;
-          height: 550px !important;
-          max-height: 550px !important;
-          aspect-ratio: auto !important;
+        .login-card {
+          width: 100%;
+          height: 550px;
+          max-height: 550px;
           border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'};
           background: ${isDark ? 'rgba(15, 17, 21, 0.6)' : 'rgba(255, 255, 255, 0.7)'};
           backdrop-filter: blur(20px);
@@ -287,6 +281,9 @@ const Login = () => {
           box-shadow: 
             0 20px 60px ${isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.15)'},
             0 0 0 1px ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} inset;
+          border-radius: 24px;
+          position: relative;
+          overflow: hidden;
         }
 
         .login-form {
@@ -604,12 +601,12 @@ const Login = () => {
         }
 
         /* Light Mode: Login Card */
-        .login-pixel-card {
-          background: rgba(255, 255, 255, 0.85) !important;
-          border: 1px solid rgba(139, 92, 246, 0.2) !important;
+        .login-card {
+          background: rgba(255, 255, 255, 0.85);
+          border: 1px solid rgba(139, 92, 246, 0.2);
           box-shadow: 
             0 20px 60px rgba(124, 58, 237, 0.15),
-            0 0 0 1px rgba(139, 92, 246, 0.1) inset !important;
+            0 0 0 1px rgba(139, 92, 246, 0.1) inset;
         }
 
         /* Light Mode: Login Header */
@@ -749,7 +746,7 @@ const Login = () => {
         }
         ` : ''}
       `}</style>
-    </div>
+    </div >
   );
 };
 
