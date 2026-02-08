@@ -8,10 +8,8 @@ import { useTheme } from '../../context/ThemeContext';
 const EvaluatorDashboard = () => {
     const [teams, setTeams] = useState([]);
     const [evaluatorProfile, setEvaluatorProfile] = useState(null);
-    const [searchNumber, setSearchNumber] = useState('');
-    const [searchResult, setSearchResult] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
-    const [searching, setSearching] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const { isDark } = useTheme();
@@ -41,37 +39,17 @@ const EvaluatorDashboard = () => {
         }
     };
 
-    const handleSearch = async (e) => {
-        e.preventDefault();
+    // Filter teams based on search query
+    const filteredTeams = teams.filter(team => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
 
-        // Validate input
-        const teamNum = parseInt(searchNumber);
-        if (!searchNumber || isNaN(teamNum) || teamNum < 1 || teamNum > 80) {
-            setError('Please enter a valid team number (1-80)');
-            return;
-        }
-
-        setSearching(true);
-        setSearchResult(null);
-        setError('');
-
-        try {
-            const response = await evaluatorAPI.searchTeam(teamNum);
-            setSearchResult(response.data.data);
-            setError(''); // Ensure error is cleared on success
-        } catch (err) {
-            setSearchResult(null); // Clear any previous result
-            setError(err.response?.data?.message || 'Team not found');
-        } finally {
-            setSearching(false);
-        }
-    };
-
-    const clearSearch = () => {
-        setSearchNumber('');
-        setSearchResult(null);
-        setError('');
-    };
+        return (
+            team.teamName?.toLowerCase().includes(query) ||
+            team.teamNumber?.toString().includes(query) ||
+            (team.domain && team.domain.toLowerCase().includes(query))
+        );
+    });
 
     const handleTeamClick = (teamId) => {
         navigate(`/evaluator/team/${teamId}`);
@@ -115,91 +93,49 @@ const EvaluatorDashboard = () => {
 
                     {/* Search Section */}
                     <div className="search-section glass-panel slide-up delay-1">
-                        <form onSubmit={handleSearch} className="search-form">
+                        <div className="search-form">
                             <div className="search-input-group">
                                 <span className="search-icon">🔍</span>
                                 <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
+                                    type="text"
                                     className="tech-input"
-                                    placeholder="ENTER TEAM NUMBER (1-80)"
-                                    value={searchNumber}
-                                    onChange={(e) => setSearchNumber(e.target.value)}
-                                    min="1"
-                                    max="80"
-                                    disabled={searching}
+                                    placeholder="SEARCH TEAM NAME OR ID..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <button type="submit" className="tech-btn primary search-btn" disabled={searching || !searchNumber}>
-                                {searching ? 'SCANNING...' : 'LOCATE'}
-                            </button>
-                            {(searchResult || error) && (
-                                <button type="button" className="tech-btn secondary" onClick={clearSearch}>
+                            {searchQuery && (
+                                <button
+                                    className="tech-btn secondary"
+                                    onClick={() => setSearchQuery('')}
+                                >
                                     CLEAR
                                 </button>
                             )}
-                        </form>
+                        </div>
                     </div>
 
                     {error && <div className="alert alert-error slide-up">{error}</div>}
 
-                    {/* Search Result View */}
-                    {searchResult && (
-                        <div className="search-result-panel glass-panel slide-up">
-                            <div className="panel-header">
-                                <div className="team-identity">
-                                    <span className="id-badge">#{searchResult.teamNumber}</span>
-                                    <div className="team-info">
-                                        <h2>{searchResult.teamName}</h2>
-                                        <div className="badges-row">
-                                            {searchResult.domain && <span className="tech-badge">{searchResult.domain}</span>}
-                                            {searchResult.isFlashRoundSelected && <span className="tech-badge flash">FLASH</span>}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button
-                                className="tech-btn primary large full-width"
-                                onClick={() => handleTeamClick(searchResult._id)}
-                            >
-                                OPEN EVALUATION INTERFACE
-                            </button>
-
-                            <div className="stats-grid mt-4">
-                                <div className="stat-box">
-                                    <label>R1</label>
-                                    <div className="stat-value">{searchResult.scores?.round1?.finalScore ?? '-'}</div>
-                                </div>
-                                <div className="stat-box">
-                                    <label>R2</label>
-                                    <div className="stat-value">{searchResult.scores?.round2?.finalScore ?? '-'}</div>
-                                </div>
-                                <div className="stat-box">
-                                    <label>R3</label>
-                                    <div className="stat-value">{searchResult.scores?.round3?.finalScore ?? '-'}</div>
-                                </div>
-                                <div className="stat-box total">
-                                    <label>TOTAL</label>
-                                    <div className="stat-value">{searchResult.totalScore}</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Teams Grid View */}
-                    {!searchResult && (
-                        <div className="teams-section slide-up delay-2">
-                            <div className="section-header">
-                                <h2>
-                                    {evaluatorProfile?.domain ? `YOUR TEAMS` : 'ALL TEAMS'}
-                                </h2>
-                                <span className="count-badge">{teams.length} DETECTED</span>
-                            </div>
+                    <div className="teams-section slide-up delay-2">
+                        <div className="section-header">
+                            <h2>
+                                {searchQuery ? 'SEARCH RESULTS' : (evaluatorProfile?.domain ? `YOUR TEAMS` : 'ALL TEAMS')}
+                            </h2>
+                            <span className="count-badge">{filteredTeams.length} DETECTED</span>
+                        </div>
 
+                        {filteredTeams.length === 0 ? (
+                            <div className="no-results glass-panel">
+                                <div className="no-results-content">
+                                    <span className="no-results-icon">🔍</span>
+                                    <p>NO TEAMS FOUND MATCHING "{searchQuery}"</p>
+                                </div>
+                            </div>
+                        ) : (
                             <div className="tech-grid">
-                                {teams.map((team, index) => (
+                                {filteredTeams.map((team, index) => (
                                     <div
                                         key={team._id}
                                         className="tech-card fade-in"
@@ -214,11 +150,11 @@ const EvaluatorDashboard = () => {
                                         <h3 className="card-title">{team.teamName}</h3>
 
                                         <div className="progress-track">
-                                            <div className="progress-step completed">R1: {team.scores?.round1?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${team.scores?.round1?.finalScore ? 'completed' : ''}`}>R1: {team.scores?.round1?.finalScore ?? '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className="progress-step">R2: {team.scores?.round2?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${team.scores?.round2?.finalScore ? 'completed' : ''}`}>R2: {team.scores?.round2?.finalScore ?? '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className="progress-step">R3: {team.scores?.round3?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${team.scores?.round3?.finalScore ? 'completed' : ''}`}>R3: {team.scores?.round3?.finalScore ?? '-'}</div>
                                         </div>
 
                                         <div className="card-footer">
@@ -230,8 +166,8 @@ const EvaluatorDashboard = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -626,6 +562,35 @@ const EvaluatorDashboard = () => {
                     .search-btn {
                          font-size: 12px; 
                     }
+                }
+
+                .no-results {
+                    padding: 40px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    background: rgba(0, 0, 0, 0.2);
+                    border: 1px dashed var(--border-color);
+                    border-radius: 8px;
+                    margin-top: 24px;
+                }
+
+                .no-results-content {
+                    text-align: center;
+                    color: var(--text-muted);
+                }
+
+                .no-results-icon {
+                    font-size: 32px;
+                    display: block;
+                    margin-bottom: 12px;
+                    opacity: 0.5;
+                }
+
+                .progress-step.completed {
+                    color: var(--primary);
+                    font-weight: 700;
+                    text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
                 }
             `}</style>
         </>

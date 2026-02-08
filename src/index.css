@@ -374,6 +374,7 @@ input[type="checkbox"] {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 24px;
 }
 
 .team-card-header {
@@ -573,6 +574,14 @@ input[type="checkbox"] {
   justify-content: center;
   min-height: 400px;
   gap: 16px;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  width: 100%;
 }
 
 .spinner {

@@ -13,7 +13,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, user, isAuthenticated } = useAuth();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -99,14 +99,6 @@ const Login = () => {
         />
       </div>
 
-      {/* Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        className="theme-toggle fade-in"
-        title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
-      >
-        {isDark ? '☀️' : '🌙'}
-      </button>
       {/* Text Banner */}
       <div className="banner-wrapper fade-in">
         <div className="text-banner-container">

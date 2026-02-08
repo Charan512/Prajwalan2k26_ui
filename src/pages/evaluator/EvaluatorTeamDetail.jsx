@@ -291,7 +291,6 @@ const EvaluatorTeamDetail = () => {
                                                 />
                                                 <div className="slider-scale">
                                                     <span>0</span>
-                                                    <span>{Math.floor(param.max / 2)}</span>
                                                     <span>{param.max}</span>
                                                 </div>
                                             </div>
@@ -1131,10 +1130,6 @@ const EvaluatorTeamDetail = () => {
                     font-size: 11px;
                     color: var(--text-muted);
                     font-weight: 600;
-                }
-
-                .slider-scale span:nth-child(2) {
-                    color: rgba(139, 92, 246, 0.7);
                 }
 
                 .slider-scale span:last-child {
