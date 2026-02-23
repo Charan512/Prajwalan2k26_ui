@@ -1132,6 +1132,10 @@ const EvaluatorTeamDetail = () => {
                     font-weight: 600;
                 }
 
+                .slider-scale span:nth-child(2) {
+                    color: rgba(139, 92, 246, 0.7);
+                }
+
                 .slider-scale span:last-child {
                     color: var(--primary);
                 }
