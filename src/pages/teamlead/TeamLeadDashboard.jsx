@@ -173,7 +173,7 @@ const TeamLeadDashboard = () => {
               <div className="team-stats-mini">
                 <div className="mini-stat">
                   <FaUsers className="mini-icon" />
-                  <span>{dashboard?.members?.length || 0} Members</span>
+                  <span>{(dashboard?.members?.length || 0) + (dashboard?.leadId ? 1 : 0)} Members</span>
                 </div>
                 <div className="mini-stat">
                   <FaStar className="mini-icon" />
@@ -225,7 +225,6 @@ const TeamLeadDashboard = () => {
                         <div className="member-details">
                           <h5 className="member-name-new">
                             {member.name}
-                            {member.isLead && <span className="lead-badge-small ml-2 text-xs bg-violet-500/20 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/30">Lead</span>}
                           </h5>
                         </div>
                       </div>
