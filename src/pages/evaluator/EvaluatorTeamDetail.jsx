@@ -21,6 +21,9 @@ const EvaluatorTeamDetail = () => {
     const [message, setMessage] = useState({ type: '', text: '' });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [tasks, setTasks] = useState([]);
+    const [savingTasks, setSavingTasks] = useState(false);
+    const isStudentEvaluator = user?.evaluatorType === 'student';
 
     const rounds = [
         {
@@ -79,6 +82,7 @@ const EvaluatorTeamDetail = () => {
     useEffect(() => {
         if (team) {
             const roundScore = team.scores?.[activeRound];
+            setTasks(team.tasks?.[activeRound] || []);
             const currentRound = rounds.find(r => r.key === activeRound);
 
             // Check if current evaluator has already submitted
@@ -125,6 +129,7 @@ const EvaluatorTeamDetail = () => {
             const response = await evaluatorAPI.getTeam(teamId);
             setTeam(response.data.data);
         } catch (err) {
+            console.error(err);
             setMessage({ type: 'error', text: 'Failed to load team' });
         } finally {
             setLoading(false);
@@ -174,7 +179,6 @@ const EvaluatorTeamDetail = () => {
     // Actual submission after confirmation
     const submitScore = async () => {
         setShowConfirmDialog(false);
-        const currentRound = rounds.find(r => r.key === activeRound);
         const totalScore = calculateTotalScore();
 
         setSubmitting(true);
@@ -187,6 +191,51 @@ const EvaluatorTeamDetail = () => {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit score' });
         } finally {
             setSubmitting(false);
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        }
+    };
+
+
+    const addTask = () => {
+        setTasks([...tasks, { title: '', description: '', visible: false }]);
+    };
+
+    const updateTask = (index, field, value) => {
+        const newTasks = [...tasks];
+        newTasks[index][field] = value;
+        setTasks(newTasks);
+    };
+
+    const removeTask = (index) => {
+        setTasks(tasks.filter((_, i) => i !== index));
+    };
+
+    const saveTasks = async () => {
+        setSavingTasks(true);
+        try {
+            await evaluatorAPI.updateTasks(teamId, activeRound, tasks);
+            setMessage({ type: 'success', text: 'Tasks saved successfully!' });
+            fetchTeam();
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'error', text: 'Failed to save tasks' });
+        } finally {
+            setSavingTasks(false);
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        }
+    };
+
+    const publishTasks = async () => {
+        setSavingTasks(true);
+        try {
+            await evaluatorAPI.publishTasks(teamId, activeRound);
+            setMessage({ type: 'success', text: 'Tasks published! Team can now see them.' });
+            fetchTeam();
+        } catch (err) {
+            console.error(err);
+            setMessage({ type: 'error', text: 'Failed to publish tasks' });
+        } finally {
+            setSavingTasks(false);
             setTimeout(() => setMessage({ type: '', text: '' }), 3000);
         }
     };
@@ -331,31 +380,103 @@ const EvaluatorTeamDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Tasks Reference Section */}
+                            {/* Tasks Section Wrapper */}
                             <div className="tasks-reference-section">
-                                <label className="zone-label">ASSIGNED TASKS REFERENCE</label>
-                                <div className="tasks-reference-container">
-                                    {roundTasks.length === 0 ? (
-                                        <div className="no-tasks-message">
-                                            <span className="no-tasks-icon">📋</span>
-                                            <p>No tasks assigned for this round</p>
+                                {isStudentEvaluator ? (
+                                    <>
+                                        <div className="section-header">
+                                            <label className="zone-label">ASSIGN TASKS</label>
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="tech-btn secondary"
+                                                    onClick={saveTasks}
+                                                    disabled={savingTasks}
+                                                    style={{ height: '30px', fontSize: '10px' }}
+                                                >
+                                                    {savingTasks ? 'SAVING...' : 'SAVE TASKS'}
+                                                </button>
+                                                <button
+                                                    className="tech-btn primary"
+                                                    onClick={publishTasks}
+                                                    disabled={savingTasks || tasks.length === 0}
+                                                    style={{ height: '30px', fontSize: '10px' }}
+                                                >
+                                                    PUBLISH TASKS
+                                                </button>
+                                            </div>
                                         </div>
-                                    ) : (
+
                                         <div className="tasks-list">
-                                            {roundTasks.map((task, idx) => (
-                                                <div key={idx} className="task-reference-item">
+                                            {tasks.map((task, index) => (
+                                                <div key={index} className="task-reference-item editable-task">
                                                     <div className="task-ref-header">
-                                                        <span className="task-ref-number">{idx + 1}</span>
-                                                        <span className="task-ref-title">{task.title}</span>
+                                                        <span className="task-ref-number">{index + 1}</span>
+                                                        <div className="task-actions">
+                                                            <label className="visibility-toggle">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={task.visible}
+                                                                    onChange={(e) => updateTask(index, 'visible', e.target.checked)}
+                                                                />
+                                                                <span>{task.visible ? 'VISIBLE' : 'HIDDEN'}</span>
+                                                            </label>
+                                                            <button
+                                                                className="remove-btn"
+                                                                onClick={() => removeTask(index)}
+                                                                title="Remove Task"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    {task.description && (
-                                                        <p className="task-ref-description">{task.description}</p>
-                                                    )}
+                                                    <input
+                                                        type="text"
+                                                        className="task-input"
+                                                        placeholder="TASK TITLE"
+                                                        value={task.title}
+                                                        onChange={(e) => updateTask(index, 'title', e.target.value)}
+                                                    />
+                                                    <textarea
+                                                        className="task-textarea"
+                                                        placeholder="TASK DESCRIPTION"
+                                                        value={task.description}
+                                                        onChange={(e) => updateTask(index, 'description', e.target.value)}
+                                                        rows={2}
+                                                    />
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
-                                </div>
+                                        <button className="tech-btn secondary add-task-btn" onClick={addTask}>
+                                            + ADD TASK
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <label className="zone-label">ASSIGNED TASKS REFERENCE</label>
+                                        <div className="tasks-reference-container">
+                                            {roundTasks.length === 0 ? (
+                                                <div className="no-tasks-message">
+                                                    <span className="no-tasks-icon">📋</span>
+                                                    <p>No tasks assigned for this round</p>
+                                                </div>
+                                            ) : (
+                                                <div className="tasks-list">
+                                                    {roundTasks.map((task, idx) => (
+                                                        <div key={idx} className="task-reference-item">
+                                                            <div className="task-ref-header">
+                                                                <span className="task-ref-number">{idx + 1}</span>
+                                                                <span className="task-ref-title">{task.title}</span>
+                                                            </div>
+                                                            {task.description && (
+                                                                <p className="task-ref-description">{task.description}</p>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="input-zone">
@@ -866,6 +987,85 @@ const EvaluatorTeamDetail = () => {
                 }
 
 
+                                .editable-task {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .section-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+                }
+                .action-buttons {
+                    display: flex;
+                    gap: 8px;
+                }
+                .task-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-left: auto;
+                }
+                .visibility-toggle {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 10px;
+                    font-family: 'JetBrains Mono', monospace;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                }
+                .remove-btn {
+                    background: transparent;
+                    border: none;
+                    color: #ef4444;
+                    cursor: pointer;
+                    font-size: 14px;
+                    padding: 4px;
+                    line-height: 1;
+                }
+                .remove-btn:hover {
+                    background: rgba(239, 68, 68, 0.1);
+                    border-radius: 4px;
+                }
+                .task-input {
+                    background: rgba(0,0,0,0.2);
+                    border: 1px solid var(--border-color);
+                    padding: 8px 12px;
+                    color: var(--text-primary);
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 12px;
+                    border-radius: 4px;
+                    width: 100%;
+                    outline: none;
+                }
+                .task-input:focus {
+                    border-color: var(--primary);
+                }
+                .task-textarea {
+                    background: rgba(0,0,0,0.2);
+                    border: 1px solid var(--border-color);
+                    padding: 8px 12px;
+                    color: var(--text-secondary);
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 11px;
+                    resize: vertical;
+                    border-radius: 4px;
+                    width: 100%;
+                    outline: none;
+                }
+                .task-textarea:focus {
+                    border-color: var(--primary);
+                }
+                .add-task-btn {
+                    width: 100%;
+                    margin-top: 12px;
+                    border: 1px dashed var(--border-color);
+                }
+                /* End Task Assignment Styles */
+                
                 .tech-textarea {
                     width: 100%;
                     background: rgba(0,0,0,0.2);
@@ -1334,6 +1534,17 @@ const EvaluatorTeamDetail = () => {
                     .confirm-dialog {
                         width: 95%;
                         max-width: none;
+                    }
+                    .section-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 12px;
+                    }
+                    .action-buttons {
+                        width: 100%;
+                    }
+                    .action-buttons .tech-btn {
+                        flex: 1;
                     }
                 }
             `}</style>

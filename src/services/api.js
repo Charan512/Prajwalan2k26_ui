@@ -63,7 +63,9 @@ export const evaluatorAPI = {
     getTeam: (teamId) => api.get(`/evaluator/teams/${teamId}`),
     searchTeam: (teamNumber) => api.get(`/evaluator/search/${teamNumber}`),
     submitScore: (teamId, round, score, feedback, parameters = {}) => api.post(`/evaluator/teams/${teamId}/score/${round}`, { score, feedback, parameters }),
-    getFlashRoundTeams: () => api.get('/evaluator/flash-round-teams')
+    getFlashRoundTeams: () => api.get('/evaluator/flash-round-teams'),
+    updateTasks: (teamId, round, tasks) => api.put(`/evaluator/teams/${teamId}/tasks/${round}`, { tasks }),
+    publishTasks: (teamId, round) => api.post(`/evaluator/teams/${teamId}/publish/${round}`)
 };
 
 // Team Lead API
