@@ -187,7 +187,7 @@ const AdminScoreEditor = () => {
                         </div>
 
                         <div className="filter-buttons">
-                            {['All', 'Web Development', 'Web3 & Blockchain', 'IoT Systems', 'Quantum Computing', 'Cyber Security', 'Machine Learning', 'Agentic AI', 'App Development'].map((domain) => (
+                            {['All', 'Web Development', 'App Development', 'Machine Learning', 'IoT Systems', 'Cyber Security'].map((domain) => (
                                 <button
                                     key={domain}
                                     className={`filter-btn ${selectedDomain === domain ? 'active' : ''}`}
