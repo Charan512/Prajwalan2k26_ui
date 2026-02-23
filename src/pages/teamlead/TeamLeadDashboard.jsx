@@ -210,15 +210,23 @@ const TeamLeadDashboard = () => {
                   </h4>
                 </div>
                 <div className="members-grid-container">
-                  {dashboard?.members?.map((member, idx) => (
-                    <div key={idx} className="member-card">
+                  {[
+                    // Add Team Lead as the first member if lead data exists
+                    ...(dashboard?.leadId ? [{ name: dashboard.leadId.name, email: dashboard.leadId.email, isLead: true }] : []),
+                    // Then add all regular members
+                    ...(dashboard?.members || [])
+                  ].map((member, idx) => (
+                    <div key={idx} className={`member-card ${member.isLead ? 'lead-card' : ''}`}>
                       <div className="member-card-inner">
                         <div className="member-avatar-large">
                           <FaUser className="avatar-icon" />
                           <div className="avatar-ring"></div>
                         </div>
                         <div className="member-details">
-                          <h5 className="member-name-new">{member.name}</h5>
+                          <h5 className="member-name-new">
+                            {member.name}
+                            {member.isLead && <span className="lead-badge-small ml-2 text-xs bg-violet-500/20 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/30">Lead</span>}
+                          </h5>
                         </div>
                       </div>
                     </div>
