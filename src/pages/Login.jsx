@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { GridScan } from '../components/GridScan';
@@ -157,10 +158,11 @@ const Login = () => {
                 <button
                   type="button"
                   className="password-toggle-btn"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8b5cf6' }}
                   onClick={() => setShowPassword(!showPassword)}
                   title={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                 </button>
               </div>
             </div>
