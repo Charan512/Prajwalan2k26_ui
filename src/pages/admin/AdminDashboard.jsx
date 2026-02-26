@@ -102,8 +102,43 @@ const AdminDashboard = () => {
       </div>
 
       <div className="page-wrapper" style={{ position: 'relative', zIndex: 10 }}>
-        <div className="container">
-          <div className="page-header flex justify-between items-start">
+        <div className="container relative">
+
+          {/* Export Dropdown - Absolute Top Right */}
+          <div className="absolute top-4 right-4 md:right-8 z-50">
+            <button
+              onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+              disabled={downloadingReport !== null}
+              className="btn btn-secondary flex items-center gap-2 relative bg-violet-600/20 hover:bg-violet-600/40 text-violet-300 border border-violet-500/30 font-orbitron shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.5)]"
+            >
+              {downloadingReport ? (
+                <span className="animate-spin inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                </svg>
+              )}
+              <span>{downloadingReport ? 'Downloading...' : 'Export CSV'}</span>
+            </button>
+
+            {isExportDropdownOpen && (
+              <div className="absolute right-0 mt-3 w-56 bg-[#0a0514]/95 backdrop-blur-xl border border-violet-500/40 rounded-xl shadow-[0_8px_32px_rgba(139,92,246,0.25)] z-50 overflow-hidden font-orbitron text-sm transform origin-top transition-all border-t-2 border-t-violet-500">
+                {['round1', 'round2', 'round3', 'final'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => handleDownload(type)}
+                    className="w-full text-left px-5 py-3.5 text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-violet-600/30 hover:to-transparent transition-all duration-300 border-b border-violet-500/10 last:border-0 flex items-center justify-between group"
+                  >
+                    <span>{type === 'final' ? '🏆 Final Results' : `📄 Round ${type.replace('round', '')} Report`}</span>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-violet-400 font-bold">→</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="page-header">
             <div>
               <h1 className="page-title">
                 <span className="gradient-text">Admin Dashboard</span>
@@ -111,39 +146,6 @@ const AdminDashboard = () => {
               <p className="page-subtitle">
                 Manage {teams.length} Teams • Assign Tasks • <span className="hidden-link" onClick={() => navigate('/admin/scores')}>View Scores</span>
               </p>
-            </div>
-
-            {/* Export Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
-                disabled={downloadingReport !== null}
-                className="btn btn-secondary flex items-center gap-2 relative bg-violet-600/20 hover:bg-violet-600/40 text-violet-300 border border-violet-500/30 font-orbitron"
-              >
-                {downloadingReport ? (
-                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                  </svg>
-                )}
-                <span>{downloadingReport ? 'Downloading...' : 'Export CSV'}</span>
-              </button>
-
-              {isExportDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-violet-500/30 rounded-lg shadow-xl z-50 overflow-hidden font-orbitron text-sm">
-                  {['round1', 'round2', 'round3', 'final'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => handleDownload(type)}
-                      className="w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-violet-600/20 transition-colors border-b border-white/5 last:border-0"
-                    >
-                      {type === 'final' ? 'Final Results' : `Round ${type.replace('round', '')} Report`}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
