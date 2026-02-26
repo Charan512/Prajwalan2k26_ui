@@ -104,48 +104,148 @@ const AdminDashboard = () => {
       <div className="page-wrapper" style={{ position: 'relative', zIndex: 10 }}>
         <div className="container relative">
 
-          {/* Export Dropdown - Absolute Top Right */}
-          <div className="absolute top-4 right-4 md:right-8 z-50">
-            <button
-              onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
-              disabled={downloadingReport !== null}
-              className="btn btn-secondary flex items-center gap-2 relative bg-violet-600/20 hover:bg-violet-600/40 text-violet-300 border border-violet-500/30 font-orbitron shadow-[0_0_15px_rgba(139,92,246,0.3)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.5)]"
-            >
-              {downloadingReport ? (
-                <span className="animate-spin inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
-                </svg>
-              )}
-              <span>{downloadingReport ? 'Downloading...' : 'Export CSV'}</span>
-            </button>
-
-            {isExportDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-[#0a0514]/95 backdrop-blur-xl border border-violet-500/40 rounded-xl shadow-[0_8px_32px_rgba(139,92,246,0.25)] z-50 overflow-hidden font-orbitron text-sm transform origin-top transition-all border-t-2 border-t-violet-500">
-                {['round1', 'round2', 'round3', 'final'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => handleDownload(type)}
-                    className="w-full text-left px-5 py-3.5 text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-violet-600/30 hover:to-transparent transition-all duration-300 border-b border-violet-500/10 last:border-0 flex items-center justify-between group"
-                  >
-                    <span>{type === 'final' ? '🏆 Final Results' : `📄 Round ${type.replace('round', '')} Report`}</span>
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-violet-400 font-bold">→</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="page-header">
-            <div>
+          {/* Page Header Row: Title + Export CSV */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+            <div className="page-header" style={{ margin: 0, textAlign: 'left' }}>
               <h1 className="page-title">
                 <span className="gradient-text">Admin Dashboard</span>
               </h1>
               <p className="page-subtitle">
                 Manage {teams.length} Teams • Assign Tasks • <span className="hidden-link" onClick={() => navigate('/admin/scores')}>View Scores</span>
               </p>
+            </div>
+
+            {/* Export CSV Dropdown */}
+            <div style={{ position: 'relative', flexShrink: 0, alignSelf: 'center' }}>
+              <button
+                onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+                disabled={downloadingReport !== null}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 18px',
+                  background: 'rgba(139, 92, 246, 0.15)',
+                  border: '1px solid rgba(139, 92, 246, 0.4)',
+                  borderRadius: '10px',
+                  color: '#c4b5fd',
+                  fontFamily: 'Orbitron, sans-serif',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: downloadingReport ? 'not-allowed' : 'pointer',
+                  opacity: downloadingReport ? 0.7 : 1,
+                  boxShadow: '0 0 15px rgba(139,92,246,0.25)',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.5px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {downloadingReport ? (
+                  <span style={{
+                    display: 'inline-block',
+                    width: '14px',
+                    height: '14px',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    borderTopColor: '#fff',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                    flexShrink: 0,
+                  }}></span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" style={{ flexShrink: 0 }}>
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                  </svg>
+                )}
+                <span>{downloadingReport ? 'Downloading...' : 'Export CSV'}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                  style={{
+                    flexShrink: 0,
+                    transition: 'transform 0.3s ease',
+                    transform: isExportDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                >
+                  <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+                </svg>
+              </button>
+
+              {isExportDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 8px)',
+                  width: '220px',
+                  background: 'rgba(8, 3, 20, 0.97)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(139, 92, 246, 0.4)',
+                  borderTop: '2px solid #8b5cf6',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 32px rgba(139,92,246,0.3), 0 2px 8px rgba(0,0,0,0.5)',
+                  zIndex: 100,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  {[
+                    { type: 'round1', label: 'Round 1 Report', color: '#a78bfa', iconType: 'doc' },
+                    { type: 'round2', label: 'Round 2 Report', color: '#a78bfa', iconType: 'doc' },
+                    { type: 'round3', label: 'Round 3 Report', color: '#a78bfa', iconType: 'doc' },
+                    { type: 'final', label: 'Final Results', color: '#fbbf24', iconType: 'trophy' },
+                  ].map(({ type, label, color, iconType }, idx, arr) => (
+                    <button
+                      key={type}
+                      onClick={() => handleDownload(type)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        padding: '12px 16px',
+                        background: 'transparent',
+                        border: 'none',
+                        borderBottom: idx < arr.length - 1 ? '1px solid rgba(139,92,246,0.12)' : 'none',
+                        color: '#d1d5db',
+                        fontFamily: 'Orbitron, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background 0.2s ease, color 0.2s ease',
+                        letterSpacing: '0.3px',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(109,40,217,0.25)';
+                        e.currentTarget.style.color = '#fff';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#d1d5db';
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {iconType === 'trophy' ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill={color} viewBox="0 0 16 16" style={{ flexShrink: 0 }}>
+                            <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 3.011v2.173l1.425.356c.194.048.377.135.537.255L13.3 15.1a.5.5 0 0 1-.3.9H3a.5.5 0 0 1-.3-.9l1.838-1.379c.16-.12.343-.207.537-.255L6.5 13.11v-2.173c-.955-.234-2.043-1.146-2.833-3.012a3 3 0 1 1-1.132-5.89A33 33 0 0 1 2.5.5m.099 2.54a2 2 0 0 0 .72 3.935c-.333-1.05-.588-2.346-.72-3.935m10.083 3.935a2 2 0 0 0 .72-3.935c-.132 1.59-.387 2.885-.72 3.935" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill={color} viewBox="0 0 16 16" style={{ flexShrink: 0 }}>
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z" />
+                          </svg>
+                        )}
+                        <span>{label}</span>
+                      </span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill={color} viewBox="0 0 16 16" style={{ flexShrink: 0, opacity: 0.7 }}>
+                        <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
