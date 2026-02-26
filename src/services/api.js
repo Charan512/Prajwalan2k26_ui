@@ -52,7 +52,8 @@ export const adminAPI = {
     selectFlashRound: (teamId, maxScore) => api.post(`/admin/teams/${teamId}/flash-round`, { maxScore }),
     removeFlashRound: (teamId) => api.delete(`/admin/teams/${teamId}/flash-round`),
     getLeaderboard: () => api.get('/admin/leaderboard'),
-    updateFacultyScore: (teamId, round, facultyScore) => api.put(`/admin/teams/${teamId}/faculty-score/${round}`, { facultyScore })
+    updateFacultyScore: (teamId, round, facultyScore) => api.put(`/admin/teams/${teamId}/faculty-score/${round}`, { facultyScore }),
+    exportReport: (type) => api.get(`/admin/export/${type}`, { responseType: 'blob' })
 };
 
 

@@ -11,6 +11,8 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [expandedDomains, setExpandedDomains] = useState({});
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(null);
   const navigate = useNavigate();
 
   const TEAMS_PER_PAGE = 6; // Show 6 teams initially
@@ -41,6 +43,32 @@ const AdminDashboard = () => {
       ...prev,
       [domain]: !prev[domain]
     }));
+  };
+
+  const handleDownload = async (type) => {
+    try {
+      setDownloadingReport(type);
+      setIsExportDropdownOpen(false);
+      const response = await adminAPI.exportReport(type);
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `prajwalan_${type}_results.csv`);
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success(`${type === 'final' ? 'Final' : `Round ${type.replace('round', '')}`} report downloaded`);
+    } catch (err) {
+      toast.error('Failed to download report');
+      console.error('Download error:', err);
+    } finally {
+      setDownloadingReport(null);
+    }
   };
 
 
@@ -75,13 +103,48 @@ const AdminDashboard = () => {
 
       <div className="page-wrapper" style={{ position: 'relative', zIndex: 10 }}>
         <div className="container">
-          <div className="page-header">
-            <h1 className="page-title">
-              <span className="gradient-text">Admin Dashboard</span>
-            </h1>
-            <p className="page-subtitle">
-              Manage {teams.length} Teams • Assign Tasks • <span className="hidden-link" onClick={() => navigate('/admin/scores')}>View Scores</span>
-            </p>
+          <div className="page-header flex justify-between items-start">
+            <div>
+              <h1 className="page-title">
+                <span className="gradient-text">Admin Dashboard</span>
+              </h1>
+              <p className="page-subtitle">
+                Manage {teams.length} Teams • Assign Tasks • <span className="hidden-link" onClick={() => navigate('/admin/scores')}>View Scores</span>
+              </p>
+            </div>
+
+            {/* Export Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+                disabled={downloadingReport !== null}
+                className="btn btn-secondary flex items-center gap-2 relative bg-violet-600/20 hover:bg-violet-600/40 text-violet-300 border border-violet-500/30 font-orbitron"
+              >
+                {downloadingReport ? (
+                  <span className="animate-spin inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full"></span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                  </svg>
+                )}
+                <span>{downloadingReport ? 'Downloading...' : 'Export CSV'}</span>
+              </button>
+
+              {isExportDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-violet-500/30 rounded-lg shadow-xl z-50 overflow-hidden font-orbitron text-sm">
+                  {['round1', 'round2', 'round3', 'final'].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => handleDownload(type)}
+                      className="w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-violet-600/20 transition-colors border-b border-white/5 last:border-0"
+                    >
+                      {type === 'final' ? 'Final Results' : `Round ${type.replace('round', '')} Report`}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Search and Filter Section */}
