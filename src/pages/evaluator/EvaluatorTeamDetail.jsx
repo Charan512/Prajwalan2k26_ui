@@ -87,7 +87,7 @@ const EvaluatorTeamDetail = () => {
 
             // Check if current evaluator has already submitted
             const userEvaluation = roundScore?.evaluations?.find(
-                e => e.evaluatorId === user?._id
+                e => e.evaluatorId?.toString() === user?._id?.toString()
             );
 
             if (userEvaluation) {
