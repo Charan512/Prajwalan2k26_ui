@@ -13,7 +13,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, user, isAuthenticated } = useAuth();
-  const { theme, isDark } = useTheme();
+
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -87,9 +87,9 @@ const Login = () => {
         <GridScan
           sensitivity={0.55}
           lineThickness={1}
-          linesColor={isDark ? "#392e4e" : "#e0e7ff"}
+          linesColor="#392e4e"
           gridScale={0.1}
-          scanColor={isDark ? "#FF9FFC" : "#0ea5e9"}
+          scanColor="#FF9FFC"
           scanOpacity={0.4}
           enablePost
           bloomIntensity={0.6}
@@ -276,13 +276,13 @@ const Login = () => {
           width: 100%;
           height: 550px;
           max-height: 550px;
-          border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)'};
-          background: ${isDark ? 'rgba(15, 17, 21, 0.6)' : 'rgba(255, 255, 255, 0.7)'};
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: rgba(15, 17, 21, 0.6);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           box-shadow: 
-            0 20px 60px ${isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.15)'},
-            0 0 0 1px ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} inset;
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
           border-radius: 24px;
           position: relative;
           overflow: hidden;
@@ -314,7 +314,7 @@ const Login = () => {
           left: 0;
           right: 0;
           height: 2px;
-          background: linear-gradient(90deg, transparent, ${isDark ? 'rgba(236, 72, 153, 0.6)' : 'rgba(14, 165, 233, 0.6)'}, transparent);
+          background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.6), transparent);
         }
 
         .login-header {
@@ -572,181 +572,6 @@ const Login = () => {
            LIGHT MODE STYLES
            ============================================ */
 
-        ${!isDark ? `
-        /* Light Mode: Page Background */
-        .login-page {
-          background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
-        }
-
-        /* Light Mode: Banner Text */
-        .hackathon-subtitle {
-          color: #1f2937;
-          text-shadow: 0 0 5px rgba(139, 92, 246, 0.2);
-        }
-
-        .prajwalan-text {
-          background: linear-gradient(135deg, #7c3aed 20%, #6366f1 50%, #8b5cf6 80%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.3));
-        }
-
-        .year-text {
-          color: #1f2937;
-          -webkit-text-fill-color: #1f2937;
-          text-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
-        }
-
-        .hackathon-tagline {
-          color: rgba(31, 41, 55, 0.8);
-        }
-
-        /* Light Mode: Login Card */
-        .login-card {
-          background: rgba(255, 255, 255, 0.85);
-          border: 1px solid rgba(139, 92, 246, 0.2);
-          box-shadow: 
-            0 20px 60px rgba(124, 58, 237, 0.15),
-            0 0 0 1px rgba(139, 92, 246, 0.1) inset;
-        }
-
-        /* Light Mode: Login Header */
-        .title-main {
-          background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #8b5cf6 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .title-accent {
-          background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #7c3aed 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        @keyframes gradient-pulse {
-          0%, 100% {
-            filter: brightness(1) drop-shadow(0 0 10px rgba(124, 58, 237, 0.2));
-          }
-          50% {
-            filter: brightness(1.1) drop-shadow(0 0 20px rgba(124, 58, 237, 0.3));
-          }
-        }
-
-        @keyframes gradient-pulse-reverse {
-          0%, 100% {
-            filter: brightness(1) drop-shadow(0 0 10px rgba(139, 92, 246, 0.2));
-          }
-          50% {
-            filter: brightness(1.1) drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
-          }
-        }
-
-        .login-subtitle {
-          color: rgba(31, 41, 55, 0.7);
-        }
-
-        /* Light Mode: Form Labels */
-        .form-label {
-          background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        /* Light Mode: Input Fields */
-        .input-field {
-          background: rgba(139, 92, 246, 0.05) !important;
-          border: 1.5px solid rgba(139, 92, 246, 0.25) !important;
-          color: #1f2937 !important;
-          box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08) inset !important;
-        }
-
-        .input-field:hover {
-          background: rgba(139, 92, 246, 0.08) !important;
-          border-color: rgba(139, 92, 246, 0.4) !important;
-        }
-
-        .input-field:focus {
-          background: rgba(139, 92, 246, 0.1) !important;
-          border-color: #8b5cf6 !important;
-          box-shadow: 
-            0 0 0 3px rgba(139, 92, 246, 0.15),
-            0 0 20px rgba(139, 92, 246, 0.2),
-            0 2px 8px rgba(139, 92, 246, 0.1) inset !important;
-        }
-
-        .input-field::placeholder {
-          color: rgba(124, 58, 237, 0.35) !important;
-        }
-
-        /* Light Mode: Password Toggle */
-        .password-toggle-btn {
-          background: rgba(139, 92, 246, 0.1);
-          border: 1px solid rgba(139, 92, 246, 0.25);
-          color: rgba(124, 58, 237, 0.8);
-        }
-
-        .password-toggle-btn:hover {
-          background: rgba(139, 92, 246, 0.2);
-          border-color: rgba(139, 92, 246, 0.4);
-          color: #7c3aed;
-        }
-
-        .password-toggle-btn:active {
-          background: rgba(139, 92, 246, 0.25);
-        }
-
-        /* Light Mode: Sign In Button */
-        .login-btn {
-          background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-          border: 1px solid rgba(139, 92, 246, 0.4);
-          box-shadow: 
-            0 4px 16px rgba(139, 92, 246, 0.3),
-            0 2px 8px rgba(124, 58, 237, 0.15),
-            0 0 0 1px rgba(167, 139, 250, 0.15) inset;
-          color: #ffffff;
-        }
-
-        .login-btn:hover {
-          background: linear-gradient(135deg, #9d6fff 0%, #8b5cf6 100%);
-          box-shadow: 
-            0 6px 24px rgba(139, 92, 246, 0.5),
-            0 4px 12px rgba(124, 58, 237, 0.25),
-            0 0 0 1px rgba(167, 139, 250, 0.3) inset;
-          border-color: rgba(139, 92, 246, 0.6);
-        }
-
-        .login-btn:active {
-          box-shadow: 
-            0 2px 8px rgba(139, 92, 246, 0.3),
-            0 0 0 1px rgba(167, 139, 250, 0.2) inset;
-        }
-
-        /* Light Mode: Footer */
-        .login-footer {
-          color: rgba(31, 41, 55, 0.6);
-        }
-
-        /* Light Mode: Theme Toggle */
-        .theme-toggle {
-          background: rgba(139, 92, 246, 0.1);
-          border: 1px solid rgba(139, 92, 246, 0.25);
-          color: #7c3aed;
-        }
-
-        .theme-toggle:hover {
-          background: rgba(139, 92, 246, 0.2);
-          box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-        }
-
-        /* Light Mode: Border Gradient */
-        .login-form::before {
-          background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
-        }
-        ` : ''}
       `}</style>
     </div >
   );
