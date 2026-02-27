@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar';
 import { evaluatorAPI } from '../../services/api';
 import HoloBackground from '../../components/HoloBackground';
 import { useTheme } from '../../context/ThemeContext';
+import { FiSearch } from 'react-icons/fi';
 
 const EvaluatorDashboard = () => {
     const [teams, setTeams] = useState([]);
@@ -101,7 +102,7 @@ const EvaluatorDashboard = () => {
                     <div className="search-section glass-panel slide-up delay-1">
                         <div className="search-form">
                             <div className="search-input-group">
-                                <span className="search-icon">🔍</span>
+                                <span className="search-icon"><FiSearch /></span>
                                 <input
                                     type="text"
                                     className="tech-input"
@@ -135,7 +136,7 @@ const EvaluatorDashboard = () => {
                         {filteredTeams.length === 0 ? (
                             <div className="no-results glass-panel">
                                 <div className="no-results-content">
-                                    <span className="no-results-icon">🔍</span>
+                                    <span className="no-results-icon"><FiSearch /></span>
                                     <p>NO TEAMS FOUND MATCHING "{searchQuery}"</p>
                                 </div>
                             </div>
