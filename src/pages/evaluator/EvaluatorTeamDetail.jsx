@@ -23,6 +23,7 @@ const EvaluatorTeamDetail = () => {
     const [hasSubmitted, setHasSubmitted] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [savingTasks, setSavingTasks] = useState(false);
+    const [evaluatorProfile, setEvaluatorProfile] = useState(null);
     const isStudentEvaluator = user?.evaluatorType === 'student';
 
     const rounds = [
@@ -76,18 +77,28 @@ const EvaluatorTeamDetail = () => {
     ];
 
     useEffect(() => {
+        fetchProfile();
         fetchTeam();
     }, [teamId]);
 
+    const fetchProfile = async () => {
+        try {
+            const response = await evaluatorAPI.getProfile();
+            setEvaluatorProfile(response.data.data);
+        } catch (err) {
+            console.error('Failed to load profile:', err);
+        }
+    };
+
     useEffect(() => {
-        if (team) {
+        if (team && evaluatorProfile) {
             const roundScore = team.scores?.[activeRound];
             setTasks(team.tasks?.[activeRound] || []);
             const currentRound = rounds.find(r => r.key === activeRound);
 
             // Check if current evaluator has already submitted
             const userEvaluation = roundScore?.evaluations?.find(
-                e => e.evaluatorId?.toString() === user?._id?.toString()
+                e => e.evaluatorId?.toString() === evaluatorProfile._id?.toString()
             );
 
             if (userEvaluation) {
@@ -137,7 +148,7 @@ const EvaluatorTeamDetail = () => {
                 }
             }
         }
-    }, [team, activeRound]);
+    }, [team, activeRound, evaluatorProfile]);
 
     const fetchTeam = async () => {
         try {
