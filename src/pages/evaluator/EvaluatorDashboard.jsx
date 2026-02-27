@@ -67,6 +67,12 @@ const EvaluatorDashboard = () => {
         );
     }
 
+    const hasEvaluated = (team, round) => {
+        if (!evaluatorProfile?._id) return false;
+        const evaluations = team.scores?.[round]?.evaluations || [];
+        return evaluations.some(e => e.evaluatorId?.toString() === evaluatorProfile._id.toString());
+    };
+
     return (
         <>
             <HoloBackground />
@@ -150,11 +156,11 @@ const EvaluatorDashboard = () => {
                                         <h3 className="card-title">{team.teamName}</h3>
 
                                         <div className="progress-track">
-                                            <div className={`progress-step ${team.scores?.round1?.finalScore ? 'completed' : ''}`}>R1: {team.scores?.round1?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${hasEvaluated(team, 'round1') ? 'completed' : ''}`}>R1: {hasEvaluated(team, 'round1') ? '✓' : '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className={`progress-step ${team.scores?.round2?.finalScore ? 'completed' : ''}`}>R2: {team.scores?.round2?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${hasEvaluated(team, 'round2') ? 'completed' : ''}`}>R2: {hasEvaluated(team, 'round2') ? '✓' : '-'}</div>
                                             <div className="progress-divide"></div>
-                                            <div className={`progress-step ${team.scores?.round3?.finalScore ? 'completed' : ''}`}>R3: {team.scores?.round3?.finalScore ?? '-'}</div>
+                                            <div className={`progress-step ${hasEvaluated(team, 'round3') ? 'completed' : ''}`}>R3: {hasEvaluated(team, 'round3') ? '✓' : '-'}</div>
                                         </div>
 
                                         <div className="card-footer">
