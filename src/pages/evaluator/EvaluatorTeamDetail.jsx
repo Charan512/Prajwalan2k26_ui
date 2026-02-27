@@ -567,9 +567,15 @@ const EvaluatorTeamDetail = () => {
                                     <p>You are about to submit your evaluation for <strong>{currentRound.label}</strong>.</p>
                                     <div className="confirm-score">
                                         <span>Total Score:</span>
-                                        <span className="score-highlight">{calculateTotalScore()}/{currentRound.maxScore}</span>
+                                        <span className="score-highlight" style={calculateTotalScore() === 0 ? { color: '#ff4444' } : {}}>{calculateTotalScore()}/{currentRound.maxScore}</span>
                                     </div>
-                                    <p className="confirm-warning">⚠️ Once submitted, you cannot change your scores. Please review carefully.</p>
+                                    {calculateTotalScore() === 0 ? (
+                                        <p className="confirm-warning" style={{ color: '#ff4444', fontWeight: 'bold' }}>
+                                            🚨 WARNING: You are submitting a score of ZERO. Have you forgotten to move the sliders? Once submitted, this cannot be undone.
+                                        </p>
+                                    ) : (
+                                        <p className="confirm-warning">⚠️ Once submitted, you cannot change your scores. Please review carefully.</p>
+                                    )}
                                 </div>
                                 <div className="confirm-actions">
                                     <button
