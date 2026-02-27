@@ -110,11 +110,26 @@ const EvaluatorTeamDetail = () => {
                 setScore('');
                 setFeedback('');
 
-                // Initialize parameters to 0
+                // Calculate storage key for this specific team and round
+                const storageKey = `draftScore_${teamId}_${activeRound}`;
+                const savedDraft = localStorage.getItem(storageKey);
+                let draftParams = null;
+
+                if (savedDraft) {
+                    try {
+                        draftParams = JSON.parse(savedDraft);
+                    } catch (e) {
+                        console.error('Failed to parse saved draft', e);
+                    }
+                }
+
+                // Initialize parameters - from draft if exists, otherwise 0
                 if (currentRound?.parameters?.length > 0) {
                     const paramObj = {};
                     currentRound.parameters.forEach(param => {
-                        paramObj[param.name] = 0;
+                        paramObj[param.name] = draftParams && draftParams[param.name] !== undefined
+                            ? draftParams[param.name]
+                            : 0;
                     });
                     setParameters(paramObj);
                 } else {
@@ -151,10 +166,18 @@ const EvaluatorTeamDetail = () => {
 
     // Handle parameter slider change
     const handleParameterChange = (paramName, value) => {
-        setParameters(prev => ({
-            ...prev,
-            [paramName]: parseInt(value) || 0
-        }));
+        setParameters(prev => {
+            const newParams = {
+                ...prev,
+                [paramName]: parseInt(value) || 0
+            };
+
+            // Save to localStorage so drafts aren't lost on refresh/navigation
+            const storageKey = `draftScore_${teamId}_${activeRound}`;
+            localStorage.setItem(storageKey, JSON.stringify(newParams));
+
+            return newParams;
+        });
     };
 
     // Show confirmation dialog
@@ -186,6 +209,11 @@ const EvaluatorTeamDetail = () => {
             await evaluatorAPI.submitScore(teamId, activeRound, totalScore, feedback, parameters);
             setMessage({ type: 'success', text: 'Score submitted successfully!' });
             setHasSubmitted(true);
+
+            // Clear the draft from localStorage now that it's submitted
+            const storageKey = `draftScore_${teamId}_${activeRound}`;
+            localStorage.removeItem(storageKey);
+
             fetchTeam();
         } catch (err) {
             setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to submit score' });
